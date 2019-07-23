@@ -1,0 +1,715 @@
+\documentclass[11pt]{article}
+
+\usepackage[top=.1in, left=.1in, right=.1in, right=.1in]{geometry}
+\usepackage{times}
+\usepackage{amsmath,amsfonts}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subfig}
+\usepackage{graphicx}
+
+\usepackage{hyperref}
+\hypersetup{bookmarks=false,colorlinks=true,plainpages=false}
+
+\usepackage{booktabs}
+\usepackage{pdflscape}
+\usepackage{rotating}
+\usepackage{fullpage}
+\usepackage{verbatim}
+
+\title{rsfMRI-tau exploratory analysis}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+<<Rlibs_opts, include=FALSE, cache=F>>=
+library(readxl)
+library(xlsx)
+library(ggplot2)
+library(ggpmisc)
+library(ggthemes)
+library(ggExtra)
+library(stargazer)
+library(dplyr)
+library(corrplot)
+library(matrixStats)
+library(zoo)
+library(plot3D)
+library(car)
+library(ppcor)
+library(lattice)
+library(xtable)
+library(tables)
+library(nlme)
+library(psych)
+library(data.table)
+library(effects)
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+roundmean <- function(x,n=2) {
+  round(mean(x,na.rm=T),digits=n)
+}
+
+roundsd <- function(x,n=2) {
+  round(sd(x,na.rm=T),digits=n)
+}
+
+roundmin <- function(x,n=2) {
+  round(min(x,na.rm=T),digits=n)
+}
+
+roundmax <- function(x,n=2) {
+  round(max(x,na.rm=T),digits=n)
+}
+
+library(knitr)
+opts_chunk$set(echo=F,
+               fig.width=6, fig.height=6, fig.path=paste('figures',.Platform$file.sep,sep=""), fig.align='center', fig.pos='h!',
+               out.width='1\\textwidth', fig.show='hold',
+               dev=c('pdf','png'), dpi=300, warning=FALSE, message=FALSE, tidy=FALSE,
+               cache=TRUE, autodep=TRUE)
+options(width=60)
+@
+
+<<inputs>>=
+# Ensure Windows-Mac compatibility
+if (.Platform$OS.type=="unix") {
+  rootname <- paste(.Platform$file.sep, "Volumes/NIAIRP2", sep="")
+} else { # if Windows
+  rootname <- paste("K:", .Platform$file.sep, sep="")
+}
+
+cogpath <- file.path(rootname,'LBN','BABS','cogstore','cog1')
+entconpath <- file.path(cogpath,'home','jacob','entorhinal-connectivity-and-tau')
+
+taursda_fname <- file.path(entconpath,'data','tau_rs_sample.xlsx')
+taursda <- as.data.frame(read_excel(taursda_fname))
+@
+
+\section{Sample characteristics}
+
+\subsection{Continuous variables}
+
+% h! option specifies that we want the table here. LaTeX will override its internal option specifications to make this happen.
+\begin{table}[h!] 
+\centering
+\tiny
+\caption{Sample characteristics for continuous variables.}
+<<sample_characteristics_continuous, results='asis'>>=
+tab <- tabular( (`Age at base AV1451 scan`=AV1451age) + 
+                (Education=educ_years) +
+                (`Days between tau and rsfMRI scans`=taurs_diff) +
+                (`Entorhinal AV1451 SUVR`=entorhinal) +
+                (`Inferior temporal AV1451 SUVR`=inferior.temporal.gyrus) ~
+                    (1+Factor(dx,"Diagnosis",
+                              levelnames=c(paste("CN (n=",sum(taursda$dx==0,na.rm=T),")",sep=""),
+                                           paste("MCI (n=",sum(taursda$dx==0.5,na.rm=T),")",sep=""))))*(
+                                             Paste(roundmean,roundsd,digits=2,head="Mean (SD)",sep=" (",postfix=")") +
+                                               Paste(roundmin,roundmax,digits=2,head="Range",sep="--\\hspace{-.5em}")),
+                  data=taursda)
+save <- booktabs()
+latex(tab)
+@
+
+\end{table}
+\begin{table}[h!]
+\tiny
+\centering
+\caption{AV1451 group sample characteristics for categorical variables.}
+<<categorical_characteristics,results='asis', echo=FALSE>>=
+tab <- tabular(                 
+  Factor(race,"Race",levelnames=c("Black","White")) +
+  Factor(apoe4,"APOE e4 status",levelnames=c("e4-","e4+")) +
+  Factor(pibgroup,"PiB group") +
+  Factor(sex,"Sex") ~ 
+     (1+Factor(dx,"Diagnosis at last BLSA visit",levelnames=c("CN","MCI")))*(Paste(1,Percent("col"),digits=0,head=" n(\\%)",sep=" (",postfix=")") ),
+                   data=taursda)
+save <- booktabs( )
+latex(tab)
+@
+\end{table}
+\clearpage
+
+\section{SUVR means}
+
+<<seedmean_distribution_scatterplots>>=
+suvr_file <- file.path(entconpath,'data','SUVR_means','entorhinal_lh','rBLSA_0364_31-0_P2_av1451_c3_mean_rbv_pvc_suvr_mni_entorhinal_lh_means.txt')
+ectau_lh_suvr <- read.delim(suvr_file, header=F)
+taursda$entorhinal_lh_suvr <- ectau_lh_suvr$V1
+
+taursda$sex[taursda$sex==0] <- "Female"
+taursda$sex[taursda$sex==1] <- "Male"
+taursda$entorhinal_suvr <- taursda$entorhinal
+taursda2 <- taursda[taursda$blsaid!=1012,] # remove outlier with high lateral AV1451 signal
+
+
+entorhinal_seeds <- c("entorhinal","entorhinal_lh")
+scatterplots <- list()
+
+for (seed in entorhinal_seeds) {
+  scatterplots[[paste0(seed,"_suvr")]] <- ggplot(taursda2, aes_string(x="AV1451age", y=paste0(seed,"_suvr"))) +
+                            geom_point(aes(color=as.factor(apoe4), shape=as.factor(sex)), size=1.5) +
+                            scale_color_manual(name="APOE status",
+                                               values=c("#008080", "#ff6f61"),
+                                               labels=c("APOE4-", "APOE4+"),
+                                               na.value="#999999") +
+                            scale_shape_manual(name="Sex",
+                                               values=c(16,17)) +
+                            geom_smooth(method='lm', color="black") +
+                            ggtitle(paste0(seed," mean tau PET")) +
+                            xlab("Age at PET scan") +
+                            ylab("SUVR") +
+                            ylim(0.75,1.8) +
+                            theme_bw(base_size = 7) +
+                            theme(legend.position="right", aspect.ratio=1)
+}
+
+suvr_histograms <- list()
+
+for (seed in entorhinal_seeds) {
+  suvr_histograms[[seed]] <- ggplot(taursda2, aes_string(x=paste0(seed,"_suvr"))) +
+                          geom_histogram(color="black", fill="lightblue", bins = 25) +
+                          labs(x=paste0(seed,"_suvr")) +
+                          #xlim(0.75,3.0) +
+                          theme_bw(base_size = 7)
+}
+
+multiplot(scatterplots$entorhinal_suvr, scatterplots$entorhinal_lh_suvr,
+          suvr_histograms$entorhinal, suvr_histograms$entorhinal_lh,
+          cols=2)
+@
+\clearpage
+<<cognition_data>>=
+#taursda <- read.csv(file.path(entconpath,'data','taurs_long_sample_VoxelStats.csv'))
+cvltda_fname <- file.path(entconpath,'data','cog','CVL.csv')
+cvltda <- read.csv(cvltda_fname)
+cvltda$cvl_date <- as.Date(cvltda[["DOV"]], "%m/%d/%Y")
+colnames(cvltda)[colnames(cvltda)=="Idno"] <- "blsaid"
+cvltda <- cvltda[c("blsaid","Visit","cvl_date","CVLtca","CVLfrl")]
+longda <- merge(taursda, cvltda, by=c("blsaid"))
+longda$cvlrs_diff <- difftime(longda$rs_date_base, longda$cvl_date, units="days")
+#longda <- longda[longda$blsaid!=1012,] # remove outlier with high lateral AV1451 signal
+# get closest cognitive test for each participant
+longda <- as.data.frame(longda %>% group_by(blsaid) %>% mutate(CVLtca=na.locf(CVLtca)))
+longda <- as.data.frame(longda %>% group_by(blsaid) %>% mutate(CVLfrl=na.locf(CVLfrl)))
+taursda <- as.data.frame(longda %>% group_by(blsaid) %>% slice(which.min(abs(cvlrs_diff))))
+taursda <- taursda[order(taursda$blsaid, taursda$blsavi),]
+#write.csv(longda, file.path(entconpath,'voxelstats_output','taurs_long_sample_VoxelStats.csv'), row.names = F)
+@
+\newgeometry{margin=0.1in} 
+\section{Regional connectivity means}
+\subsection{Age at PET scan}
+<<global_connectivity_means>>=
+taursda$sex[taursda$sex==0] <- "Female"
+taursda$sex[taursda$sex==1] <- "Male"
+taursda$ectau_onecenter <- taursda$entorhinal - 1
+
+musemasks <- c("MTL","EC","AMY","HC","PHG")
+outcomes <- c("AV1451age","entorhinal","entorhinal_lh_suvr","CVLtca","CVLfrl")
+
+for (mask in musemasks) {
+  globconn_fname <- file.path(entconpath,'nipype_output','output','global_connectivity_means',paste0("roi_name_",mask),paste0(mask,"_globconn.txt"))
+  taursda[,paste0(mask,"_connectivity")] <- read.delim(globconn_fname, header=F)
+}
+
+conn_plots <- list()
+for (outcome in outcomes) {
+  for (mask in musemasks) {
+    conn_plots[[outcome]][[mask]] <- ggplot(taursda, aes_string(x=outcome, y=paste0(mask,"_connectivity"))) +
+                                geom_point(aes(color=as.factor(pibgroup), shape=as.factor(apoe4)), size=1) +
+                                scale_color_manual(name="PiB group",
+                                               values=c("#0072B2", "#D55E00"),
+                                               labels=c("PiB-", "PiB+"),
+                                               na.value="#999999") +
+                                scale_shape_manual(name="apoe status",
+                                               values=c(16,17),
+                                               labels=c("apoe4-","apoe4+")) +
+                                geom_smooth(method='lm', color="black") +
+                                facet_wrap(~sex) +
+                                #ggtitle(mask) +
+                                xlab(outcome) +
+                                ylab(paste0(mask," connectivity")) +
+                                theme_bw(base_size = 7) +
+                                theme(legend.position = "right", aspect.ratio=1)
+  }
+}
+@
+\clearpage
+\section{Regional connectivity models}
+<<MTLconn_ECtau_regional, results='asis'>>=
+taursda <- taursda[taursda$blsaid!=1012,] # remove outlier with high lateral AV1451 signal
+
+taursda$MTL_suvr <- with(taursda, (taursda$entorhinal + taursda$hippocampus + taursda$parahippocampal + taursda$amygdala)/4)
+muse_suvrs <- c("entorhinal","hippocampus","parahippocampal","amygdala","MTL_suvr")
+lm_formula <- substitute(paste0(mask,"_connectivity ~ 1 + AV1451age_c + sex + apoe4 + fd + ",muse))
+lm.taucovar <- list()
+taucovar_plots <- list()
+
+for (mask in musemasks) {
+  for (muse in muse_suvrs) {
+    lm.taucovar[[muse]][[mask]] <- lm(as.formula(eval(lm_formula)), taursda)
+    taucovar_plots[[muse]][[mask]] <- ggplot(data=taursda, aes_string(x=muse, y=paste0(mask,"_connectivity"))) +
+                                             geom_point(size = 2) +
+                                             geom_smooth(method='lm') +
+                                             xlab(paste0(muse," AV1451 SUVR")) +
+                                             ylab(paste0(mask," connectivity")) +
+                                             theme_bw(base_size = 7)
+  }
+}
+
+stargazer(lm.taucovar$entorhinal,
+          font.size = "small",
+          dep.var.labels = "Intra-regional connectivity ",
+          column.labels = musemasks,
+          covariate.labels = c("age","sex","apoe" ,"motion","ECtau"),
+          report="vc*sp", 
+          star.cutoffs=c(0.05,0.01,0.001))
+
+multiplot(taucovar_plots$entorhinal$EC, taucovar_plots$entorhinal$HC, taucovar_plots$entorhinal$AMY, taucovar_plots$entorhinal$PHG,
+          cols = 2)
+@
+\clearpage
+<<age_sex_apoe, results='asis'>>=
+agefd.fits <- list()
+sexfd.fits <- list()
+apoefd.fits <- list()
+
+for (mask in musemasks) {
+  agefd.fits[[mask]] <- lm(as.formula(eval(substitute(paste0(mask,"_connectivity ~ 1 + AV1451age_c*fd_c")))), data=taursda, na.action=na.exclude)
+  sexfd.fits[[mask]] <- lm(as.formula(eval(substitute(paste0(mask,"_connectivity ~ 1 + sex*fd_c")))), data=taursda, na.action=na.exclude)
+  apoefd.fits[[mask]] <- lm(as.formula(eval(substitute(paste0(mask,"_connectivity ~ 1 + apoe4*fd_c")))), data=taursda, na.action=na.exclude)
+}
+
+stargazer(agefd.fits,
+          font.size = "small",
+          dep.var.labels = "Intra-regional connectivity ",
+          column.labels = musemasks,
+          #covariate.labels = c("age","apoe","sex","motion","ECtau"),
+          report="vc*sp", 
+          star.cutoffs=c(0.05,0.01,0.001))
+
+stargazer(sexfd.fits,
+          font.size = "small",
+          dep.var.labels = "Intra-regional connectivity ",
+          column.labels = musemasks,
+          #covariate.labels = c("age","apoe","sex","motion","ECtau"),
+          report="vc*sp", 
+          star.cutoffs=c(0.05,0.01,0.001))
+
+stargazer(apoefd.fits,
+          font.size = "small",
+          dep.var.labels = "Intra-regional connectivity ",
+          column.labels = musemasks,
+          #covariate.labels = c("age","apoe","sex","motion","ECtau"),
+          report="vc*sp", 
+          star.cutoffs=c(0.05,0.01,0.001))
+@
+\clearpage
+<<cog_globconn, results='asis'>>=
+cog_outcomes <- c("CVLtca","CVLfrl")
+lm_formula <- substitute(paste0(cog," ~ 1 + sex + AV1451age_c + entorhinal_c*",mask,"_connectivity_c"))
+globconn_fits <- list()
+
+for (cog in cog_outcomes) {
+  for (mask in musemasks) {
+    taursda[,paste0(mask,"_connectivity_c")] <- taursda[,paste0(mask,"_connectivity")] - mean(taursda[,paste0(mask,"_connectivity")])
+    globconn_fits[[cog]][[mask]] <- lm(as.formula(eval(lm_formula)), data=taursda, na.action=na.exclude)
+  }
+}
+covar_labels = c("age",
+                 "sex",
+                 "entorhinal SUVR",
+                 "MTL connectivity",
+                 "EC connectivity",
+                 "AMY connectivity",
+                 "HC connectivity",
+                 "PHG connectivity")
+stargazer(globconn_fits$CVLtca,
+          font.size = "tiny",
+          dep.var.labels = "CVLT immediate",
+          #covariate.labels = covar_labels,
+          report="vc*sp", 
+          star.cutoffs=c(0.05,0.01,0.001))
+stargazer(globconn_fits$CVLfrl,
+          font.size = "tiny",
+          dep.var.labels = "CVLT long-delay",
+          #covariate.labels = covar_labels,
+          report="vc*sp", 
+          star.cutoffs=c(0.05,0.01,0.001))
+@
+\clearpage
+<<3dplot_cognition_conn_tau>>=
+scatter3D(x = taursda$entorhinal_suvr, y = taursda$HC_connectivity, z = taursda$CVLfrl,
+          labels = c("EC AV1451 SUVR","Regional HC connectivity","CVLT long-delay"),
+          colvar=taursda$entorhinal_suvr, phi=35, bty="g", type="h",
+          ticktype="detailed", pch=19, cex=0.5)
+@
+\clearpage
+\section{Connectivity values adjusted for motion}
+<<MTLconn_fdadj, results='asis'>>=
+reg_formula <- substitute(paste0(mask,"_connectivity ~ 1 + fd"))
+int_formula <- substitute(paste0(mask,"_conn.fdres ~ 1 + AV1451age*sex*apoe4"))
+#int_formula <- substitute(paste0(mask,"_conn.fdres ~ 1 + AV1451age_c + entorhinal_lh_suvr + sex + apoe4"))
+# regress fd out of each variable
+int.lm <- list()
+for (mask in musemasks) {
+  motion.reg <- lm(as.formula(eval(reg_formula)), data=taursda, na.action = na.exclude)
+  motion.res <- resid(motion.reg)
+  taursda[,paste0(mask,"_conn.fdres")] <- motion.res + mean(taursda[,paste0(mask,"_connectivity")])
+  taursda[,paste0(mask,"_conn.fdres_c")] <- taursda[,paste0(mask,"_conn.fdres")] - mean(taursda[,paste0(mask,"_conn.fdres")])
+  int.lm[[mask]] <- lm(as.formula(eval(int_formula)), data=taursda, na.action = na.exclude)
+}
+stargazer(int.lm,
+          font.size = "small",
+          #covariate.labels = int_labels,
+          dep.var.labels = "Regional connectivity adjusted for motion",
+          column.labels = musemasks,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+@
+\clearpage
+<<age_vs_motion>>=
+p1 <- ggplot(data=taursda, aes(x=AV1451age, y=fd)) +
+        geom_point(aes(), size=2) +
+        geom_smooth(method='lm') +
+        theme_bw(base_size=10)
+@
+\clearpage
+<<musesuvr_corrmatrices>>=
+muse_labels <- c("entorhinal","hippocampus","amygdala","parahippocampal","MTL_suvr","inferior.temporal.gyrus")
+cp1 <- corrplot(cor(taursda[muse_labels]), method="number")
+
+excda_suvr_fname <- file.path(cogpath,'home','jacob','tau_predictors','data','exc','manual_seed_mean_SUVRs_checked.csv')
+excda_suvr <- read.csv(excda_suvr_fname, na="")
+excda_suvr <- excda_suvr[c("blsaid","blsavi","LR_CP")]
+excda <- merge(excda_suvr, taursda, by=c("blsaid","blsavi"))
+
+muse_labels <- c("entorhinal","hippocampus","amygdala","parahippocampal","MTL_suvr","inferior.temporal.gyrus","LR_CP")
+#cp2 <- corrplot(cor(excda[muse_labels]), method="number")
+@
+\clearpage
+\section{Longitudinal Analyses}
+\subsection{Regional connectivity and tau}
+<<longitudinal_data, results='asis'>>=
+longda_fname <- file.path(entconpath,'data','taurs_long_sample.xlsx')
+longda <- as.data.frame(read_excel(longda_fname))
+longda$interval <- -1*longda$interval/365
+
+for (mask in musemasks) {
+  globconn_fname <- file.path(entconpath,'nipype_output_longitudinal','output','global_connectivity_means',paste0("roi_name_",mask),paste0(mask,"_globconn.txt"))
+  longda[,paste0(mask,"_connectivity")] <- read.delim(globconn_fname, header=F)
+  longda[,paste0(mask,"_connectivity_c")] <- longda[,paste0(mask,"_connectivity")] - mean(longda[,paste0(mask,"_connectivity")])
+}
+
+longda <- longda[longda$blsaid!=1012,] # remove outlier with high lateral AV1451 signal
+
+conn_lme.formula <- substitute(paste0(mask,"_connectivity ~ 1 + fd + AV1451age + apoe4 + sex + pibgroup + entorhinal_c*interval"))
+randefs <- as.formula("~1+interval|blsaid")
+lCtrl <- lmeControl(opt="optim",maxIter=100,msMaxIter=100,niterEM=50,msMaxEval=400)
+
+conn_lme.fits <- list()
+conntraj_plots <- list()
+
+for (mask in musemasks) {
+  conn_lme.fits[[mask]] <- lme(as.formula(eval(conn_lme.formula)), random=randefs, data=longda, control=lCtrl, na.action=na.exclude)
+  # plots of intra-regional connectivity trajectories from LME models
+  longda[paste0(mask,"_conn_pred.ranef")] <- conn_lme.fits[[mask]]$fitted[,"blsaid"][match(rownames(longda),names(conn_lme.fits[[mask]]$fitted[,"blsaid"]))]
+  
+  conntraj_plots[[mask]] <- ggplot(longda,
+                                   aes_string(x="interval", y=paste0(mask,"_conn_pred.ranef"), group="blsaid"), color="grey") +
+                            geom_line() +
+                            xlab("Time prior to AV1451scan (years)") +
+                            ylab(paste0(mask," intra-regional connectivity")) +
+                            theme_bw(base_size=7) + theme(aspect.ratio=1)
+}
+
+stargazer(conn_lme.fits,
+          dep.var.labels = "Within-region connectivity",
+          column.labels = musemasks,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+
+multiplot(conntraj_plots$EC, conntraj_plots$HC, conntraj_plots$AMY, conntraj_plots$PHG, cols=2)
+@
+
+<<icc_conn, results='asis'>>=
+icc_conn1 <- list()
+icc_conn2 <- list()
+for (mask in musemasks) {
+  # ICC computed using base LME model
+  fit <- lme(as.formula(eval(paste0(mask,"_connectivity ~ 1 + interval"))), random=~1+interval|blsaid, data=longda, control=lCtrl, na.action = na.omit)
+  icc_conn1[[mask]] <- as.numeric(VarCorr(fit)["(Intercept)","Variance"]) / sum(as.numeric(VarCorr(fit)[,"Variance"]))
+  # ICC computed using {psych} package
+  df <- split(longda[,paste0(mask,"_connectivity")], longda$blsaid, drop=FALSE)
+  df <- as.data.frame(lapply(df, `length<-`, max(lengths(df))))
+  df <- transpose(df[1:3,][,colSums(is.na(df[1:3,]))==0])
+  icc_conn2[[mask]] <- ICC(df, missing=T, alpha=.05)
+}
+@
+\subsection{Cognition, regional connectivity, and tau}
+<<cog_conn_tau, results='asis'>>=
+### cross-sectional tau data, longitudinal rs data and concurrent longitudinal CVLT data, interval between tau and rs
+cvltda$rs_blsavi <- cvltda$Visit
+longda <- merge(longda, cvltda, by=c("blsaid","rs_blsavi"))
+
+### cross-sectional tau data and concurrent cross-sectional rs data, longitudinal cognitive data, interval between tau and cog
+#taursda <- taursda[c("blsaid","tau_date","AV1451age_c","sex","apoe4","pibgroup","entorhinal","entorhinal_c",
+#                     "MTL_connectivity","EC_connectivity","HC_connectivity","AMY_connectivity","PHG_connectivity",
+#                     "MTL_connectivity_c","EC_connectivity_c","HC_connectivity_c","AMY_connectivity_c","PHG_connectivity_c",
+#                     "MTL_conn.fdres_c","EC_conn.fdres_c","HC_conn.fdres_c","AMY_conn.fdres_c","PHG_conn.fdres_c")]
+#longda <- merge(taursda, cvltda, by=c("blsaid"))
+#longda <- longda[order(longda$blsaid,longda$Visit),]
+#longda$interval <- -1*(difftime(longda$tau_date, longda$cvl_date, units="days"))/365
+#longda <- longda[longda$interval>-15,] # exclude visits more than 15 years prior to AV1451 scan from analyses
+
+cog_lme.formula <- substitute(paste0(cog," ~ 1 + AV1451age_c + sex + pibgroup + entorhinal_c*",mask,"_connectivity_c*interval"))
+cog_lme.fits <- list()
+
+for (cog in cog_outcomes) {
+  for (mask in musemasks) {
+    cog_lme.fits[[mask]][[cog]] <- lme(as.formula(eval(cog_lme.formula)),
+                                       random=randefs, data=longda,
+                                       control=lCtrl,
+                                       na.action=na.exclude)
+  }
+}
+
+stargazer(cog_lme.fits$MTL,
+          dep.var.labels = "",
+          column.labels = cog_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+stargazer(cog_lme.fits$EC,
+          dep.var.labels = "",
+          column.labels = cog_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+stargazer(cog_lme.fits$AMY,
+          dep.var.labels = "",
+          column.labels = cog_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+stargazer(cog_lme.fits$HC,
+          dep.var.labels = "",
+          column.labels = cog_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+stargazer(cog_lme.fits$PHG,
+          dep.var.labels = "",
+          column.labels = cog_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+@
+
+<<icc_cog>>=
+icc_cog1 <- list()
+icc_cog2 <- list()
+for (cog in cog_outcomes) {
+  # ICC computed using base LME model
+  fit <- lme(as.formula(eval(paste0(cog," ~ 1 + interval"))), random=~1+interval|blsaid, data=longda, control=lCtrl, na.action = na.omit)
+  icc_cog1[[cog]] <- as.numeric(VarCorr(fit)["(Intercept)","Variance"]) / sum(as.numeric(VarCorr(fit)[,"Variance"]))
+  # ICC computed using {psych} package
+  df <- split(longda[,cog], longda$blsaid, drop=FALSE)
+  df <- as.data.frame(lapply(df, `length<-`, max(lengths(df))))
+  df <- transpose(df[1:6,][,colSums(is.na(df[1:6,]))==0])
+  icc_cog2[[cog]] <- ICC(df, missing=T, alpha=.05)
+}
+@
+\clearpage
+<<cog_tau_conn_long_plots>>=
+longda$is.lastcog <- with(longda, Visit==ave(Visit, blsaid, FUN=function(x) x[length(x)]))
+cogtraj_plots <- list()
+cogchange_tauplots <- list()
+cogchange_connplots <- list()
+
+cog_outcomes <- c("CVLfrl","CVLtca")
+musemasks <- c("EC","AMY","PHG","MTL","HC")
+
+for (cog in cog_outcomes) {
+  for (mask in musemasks) {
+    # plots of CVLT trajectories from LME models
+    longda[paste0(cog,"_pred.ranef")] <- cog_lme.fits[[mask]][[cog]]$fitted[,"blsaid"][match(rownames(longda),names(cog_lme.fits[[mask]][[cog]]$fitted[,"blsaid"]))]
+    
+    cogtraj_plots[[mask]][[cog]] <- ggplot(subset(longda, !is.na(eval(parse(text=cog)))),
+                                           aes_string(x="interval", y=paste0(cog,"_pred.ranef"), group="blsaid"), color="grey") +
+                                    geom_line() +
+                                    ggtitle(paste0("Predicted from ",mask," connectivity")) +
+                                    xlab("Time prior to AV1451 scan (years)") +
+                                    ylab(cog) +
+                                    theme_bw(base_size=7) + theme(aspect.ratio=1)
+
+    # plots of CVLT change vs. entorhinal SUVR
+    newdata <- expand.grid(blsaid=unique(longda$blsaid),
+                           interval=c(0,1))
+    newdata <- merge(newdata,
+                     subset(longda, is.lastcog,
+                            select=c("blsaid","AV1451age_c","sex","entorhinal","entorhinal_c",paste0(mask,"_connectivity"), paste0(mask,"_connectivity_c"))),
+                     by="blsaid")
+    
+    newdata[,paste0(cog,"_pred")] <- predict(cog_lme.fits[[mask]][[cog]], newdata=newdata)
+    
+    newdata <- newdata[order(newdata$blsaid, newdata$interval),]
+    newdata[,paste0(cog,"_change")] <- with(newdata,
+                                                ave(eval(parse(text=paste0(cog,"_pred"))), blsaid, FUN=function(x) x[2]-x[1]))
+    
+    cogchange_tauplots[[mask]][[cog]] <- ggplot(subset(newdata, interval==0),
+                                                aes_string(x="entorhinal", y=paste0(cog,"_change"))) +
+                                         geom_point(size=1, color = "#000000", alpha=.8) +
+                                         geom_smooth(method='lm', color="#000000", size = 1) +
+                                         ggtitle(paste0("Predicted from ",mask," connectivity")) +
+                                         xlab("Entorhinal AV1451 SUVR") +
+                                         ylab(paste0(cog," change/year")) +
+                                         theme_bw(base_size=7) + theme(aspect.ratio=1)
+    
+    cogchange_connplots[[mask]][[cog]] <- ggplot(subset(newdata, interval==0),
+                                             aes_string(x=paste0(mask,"_connectivity"), y=paste0(cog,"_change"))) +
+                                          geom_point(size=1, color = "#000000", alpha=.8) +
+                                          geom_smooth(method='lm', color="#000000", size = 1) +
+                                          xlab(paste0(mask," connectivity")) +
+                                          ylab(paste0(cog," change/year")) +
+                                          theme_bw(base_size=7) + theme(aspect.ratio=1)
+  }
+}
+
+multiplot(cogtraj_plots$MTL$CVLtca, cogtraj_plots$MTL$CVLfrl, cols = 1)
+
+multiplot(cogchange_tauplots$MTL$CVLtca, cogchange_tauplots$MTL$CVLfrl, cogchange_connplots$MTL$CVLtca, cogchange_connplots$MTL$CVLfrl, cols = 2)
+
+multiplot(cogchange_tauplots$HC$CVLtca, cogchange_tauplots$HC$CVLfrl, cogchange_connplots$HC$CVLtca, cogchange_connplots$HC$CVLfrl, cols = 2)
+@
+\clearpage
+\subsection{Volume, regional connectivity, and tau}
+<<volumeda>>=
+volume_spreadsheet_fname <- file.path(cogpath,'home','jacob','tau_predictors','data','mri_volume','BLSA_ROI-Volumes_SBIA_Aug2018_ICVadjusted.csv')
+volumeda <- read.csv(volume_spreadsheet_fname)
+volumeda$vol_date <- as.Date(volumeda[["DOV"]], "%m/%d/%Y")
+volumeda$entvol <- with(volumeda, (volumeda$X116ah + volumeda$X117ah)/1000)
+volumeda$hcvol <- with(volumeda, (volumeda$X47ah + volumeda$X48ah)/1000)
+volumeda$amyvol <- with(volumeda, (volumeda$X31ah + volumeda$X32ah)/1000)
+volumeda$phgvol <- with(volumeda, (volumeda$X170ah + volumeda$X171ah)/1000)
+volumeda$MTLvol <- with(volumeda, (volumeda$entvol + volumeda$hcvol + volumeda$amyvol + volumeda$phgvol))
+volumeda <- volumeda[c("blsaid","blsavi","vol_date","entvol","hcvol","amyvol","phgvol","MTLvol")]
+@
+
+<<vol_conn_tau, results='asis'>>=
+### cross-sectional tau data, longitudinal rs data and concurrent longitudinal voluemtric data, interval between tau and rs
+colnames(volumeda)[colnames(volumeda)=="blsavi"] <- "rs_blsavi"
+longda <- merge(longda, volumeda, by=c("blsaid","rs_blsavi"))
+
+### cross-sectional tau data and concurrent cross-sectional rs data, longitudinal volumetric data, interval between tau and vol
+#colnames(volumeda)[colnames(volumeda)=="blsavi"] <- "vol_blsavi"
+#longda <- merge(taursda, volumeda, by=c("blsaid"))
+#longda <- longda[order(longda$blsaid,longda$vol_blsavi),]
+#longda$interval <- -1*(difftime(longda$tau_date, longda$vol_date, units="days"))/365
+
+vol_outcomes <- c("MTLvol","hcvol","entvol","amyvol","phgvol")
+vol_lme.formula <- substitute(paste0(vol," ~ 1 + AV1451age_c + sex + entorhinal_c*",mask,"_connectivity_c*interval"))
+vol_lme.fits <- list()
+
+for (vol in vol_outcomes) {
+  for (mask in musemasks) {
+    vol_lme.fits[[mask]][[vol]] <- lme(as.formula(eval(vol_lme.formula)),
+                                       random=randefs, data=longda,
+                                       control=lCtrl,
+                                       na.action=na.exclude)
+  }
+}
+
+stargazer(vol_lme.fits$MTL,
+          dep.var.labels = "",
+          column.labels = vol_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+stargazer(vol_lme.fits$EC,
+          dep.var.labels = "",
+          column.labels = vol_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+stargazer(vol_lme.fits$AMY,
+          dep.var.labels = "",
+          column.labels = vol_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+stargazer(vol_lme.fits$HC,
+          dep.var.labels = "",
+          column.labels = vol_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+stargazer(vol_lme.fits$PHG,
+          dep.var.labels = "",
+          column.labels = vol_outcomes,
+          report="vc*sp",
+          star.cutoffs = c(0.05,0.01,0.001))
+
+voltraj_plots <- list()
+
+for (vol in vol_outcomes) {
+  for (mask in musemasks) {
+    # plots of volume trajectories from LME models
+    longda[paste0(vol,"_pred.ranef")] <- vol_lme.fits[[mask]][[vol]]$fitted[,"blsaid"][match(rownames(longda),names(vol_lme.fits[[mask]][[vol]]$fitted[,"blsaid"]))]
+    
+    voltraj_plots[[mask]][[vol]] <- ggplot(subset(longda, !is.na(eval(parse(text=vol)))),
+                                           aes_string(x="interval", y=paste0(vol,"_pred.ranef"), group="blsaid"), color="grey") +
+                                    geom_line() +
+                                    ggtitle(paste0("Predicted from ",mask," connectivity")) +
+                                    xlab("Time prior to AV1451 scan (years)") +
+                                    ylab(vol) +
+                                    theme_bw(base_size=7) + theme(aspect.ratio=1)
+  }
+}
+
+multiplot(voltraj_plots$EC$entvol, voltraj_plots$HC$hcvol, voltraj_plots$AMY$amyvol, voltraj_plots$PHG$phgvol, cols = 2)
+@
+
+<<icc_vol>>=
+icc_vol1 <- list()
+icc_vol2 <- list()
+for (vol in vol_outcomes) {
+  # ICC computed using base LME model
+  fit <- lme(as.formula(eval(paste0(vol," ~ 1 + interval"))), random=~1+interval|blsaid, data=longda, control=lCtrl, na.action = na.omit)
+  icc_vol1[[vol]] <- as.numeric(VarCorr(fit)["(Intercept)","Variance"]) / sum(as.numeric(VarCorr(fit)[,"Variance"]))
+  # ICC computed using {psych} package
+  df <- split(longda[,vol], longda$blsaid, drop=FALSE)
+  df <- as.data.frame(lapply(df, `length<-`, max(lengths(df))))
+  df <- transpose(df[1:4,][,colSums(is.na(df[1:4,]))==0])
+  icc_vol2[[vol]] <- ICC(df, missing=T, alpha=.05)
+}
+@
+\end{document}

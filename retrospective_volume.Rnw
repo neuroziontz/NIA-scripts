@@ -1,0 +1,495 @@
+\documentclass[11pt]{article}
+
+\usepackage[top=.1in, left=.1in, right=.1in, bottom=.1in]{geometry}
+
+\usepackage{times}
+
+\usepackage{amsmath,amsfonts}
+\usepackage{color}
+
+\usepackage{caption}
+\usepackage{subfig}
+
+\usepackage{hyperref}
+\hypersetup{bookmarks=false, colorlinks=true, plainpages=false}
+
+\usepackage{booktabs}
+
+\usepackage{pdflscape}
+
+\usepackage{fullpage}
+
+\pagenumbering{gobble} % turn off page numbering
+
+\title{AV1451 tau PET retrospective neurodegeneration}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+<<Rlibs_opts, include=FALSE, cache=F>>=
+library(readxl)
+library(ppcor)
+library(lattice)
+library(ggplot2)
+library(ggpmisc)
+library(ggthemes)
+library(ggExtra)
+library(nlme)
+library(dplyr)
+library(corrplot)
+library(stargazer)
+library(xtable)
+library(tables)
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+roundmean <- function(x,n=2) {
+  round(mean(x,na.rm=T),digits=n)
+}
+
+roundsd <- function(x,n=2) {
+  round(sd(x,na.rm=T),digits=n)
+}
+
+roundmin <- function(x,n=2) {
+  round(min(x,na.rm=T),digits=n)
+}
+
+roundmax <- function(x,n=2) {
+  round(max(x,na.rm=T),digits=n)
+}
+# report generation
+library(knitr)
+opts_chunk$set(echo=F,
+               fig.width=6, fig.height=6, fig.path=paste('figures',.Platform$file.sep,sep=""), fig.align='center', fig.pos='h!',
+               out.width='1\\textwidth', fig.show='hold',
+               dev=c('pdf','png'), dpi=300, warning=FALSE, message=FALSE, tidy=FALSE,
+               cache=TRUE, autodep=TRUE)
+options(width=60)
+@
+
+<<inputs>>=
+# function to remove rows from data tables with na in specified column(s)
+completeFun <- function(data, desiredCols) {
+  completeVec <- complete.cases(data[, desiredCols])
+  return(data[completeVec, ])
+}
+readpetdata <- function(fname) {
+    # Read Excel file as a data.frame, skipping first row
+    da <- as.data.frame(read_excel(fname, skip=1))
+    
+    # Make sure column names do not include spaces or special characters
+    #  (any unallowed character will be replaced with . )
+    colnames(da) <- make.names(colnames(da), unique=T)
+    
+    # Split idvi into blsaid and blsavi
+    da$idvi <- sub("_P2_.*.nii.gz","",sub(".*BLSA_","",da$image.path))
+    da$blsaid <- as.numeric(substr(da$idvi,1,4)) # first four characters are the participant ID
+    da$blsavi <- as.numeric(substr(da$idvi,6,7)) + as.numeric(substr(da$idvi,9,9))/10 # remaining characters indicate visit number
+    
+    da # function returns the resulting data.frame
+}
+
+if (.Platform$OS.type=="unix") {
+  rootname <- paste(.Platform$file.sep, "Volumes/NIAIRP2", sep="")
+} else { # if Windows
+  rootname <- paste("Q:", .Platform$file.sep, sep="")
+}
+
+cogpath <- file.path(rootname,'LBN','BABS','cogstore','cog1')
+datapath <- file.path(cogpath,'home','jacob','tau_predictors','data')
+@
+
+<<data_tables>>=
+tauda_ROI_mean_fname <- file.path(datapath,'av1451','ROI_AV1451_pvc_SUVR.xlsx')
+tauda_ROI_mean <- readpetdata(tauda_ROI_mean_fname)
+tauda_ROI_mean <- tauda_ROI_mean[order(tauda_ROI_mean$blsaid,tauda_ROI_mean$blsavi),]
+tauda_ROI_mean$baseblsavi <- with(tauda_ROI_mean, ave(blsavi, blsaid, FUN=function(x) x[1])) # blsavi corresponding to baseline visit
+tauda_ROI_mean$is.baseline <- tauda_ROI_mean$blsavi==tauda_ROI_mean$baseblsavi
+tauda_ROI_mean_CS <- tauda_ROI_mean[tauda_ROI_mean$is.baseline,]
+tauda_ROI_mean_CS$BraakIII <- with(tauda_ROI_mean_CS, (tauda_ROI_mean_CS$parahippocampal + tauda_ROI_mean_CS$fusiform + (tauda_ROI_mean_CS$Left.LiG...lingual.gyrus + tauda_ROI_mean_CS$Right.LiG...lingual.gyrus)/2 + tauda_ROI_mean_CS$amygdala)/4)
+tauda_ROI_mean_CS$BraakIV <- with(tauda_ROI_mean_CS, (tauda_ROI_mean_CS$inferior.temporal.gyrus + (tauda_ROI_mean_CS$Left.MTG...middle.temporal.gyrus + tauda_ROI_mean_CS$Right.MTG...middle.temporal.gyrus)/2 + (tauda_ROI_mean_CS$Left.TMP...temporal.pole + tauda_ROI_mean_CS$Right.TMP...temporal.pole)/2 + tauda_ROI_mean_CS$thalamus + tauda_ROI_mean_CS$caudate + (tauda_ROI_mean_CS$Left.PCgG..posterior.cingulate.gyrus + tauda_ROI_mean_CS$Right.PCgG..posterior.cingulate.gyrus)/2 + tauda_ROI_mean_CS$insula.GM)/7)
+# add extracted SUVR from conjunction map ROI
+conjmaskda_fname <- file.path(cogpath,'home','jacob','tau_predictors','manuscript_freezedir','conjmask_suvr.csv')
+conjmaskda <- as.data.frame(read.csv(conjmaskda_fname))
+tauda <- merge(tauda_ROI_mean_CS, conjmaskda, by=c("blsaid","blsavi"), all.x=T)
+tauda <- tauda[c("blsaid","Braak.I.II","Braak.III.IV","Braak.V.VI","BraakIII","BraakIV","hippocampus","entorhinal","conjmask_suvr")]
+
+# only include visits with CVLT data
+LME_spreadsheet_fname <- file.path(datapath, 'VoxelStatsLME_spreadsheet.csv')
+cog_longda <- read.csv(LME_spreadsheet_fname)
+cog_longda$race_bin <- ifelse(cog_longda$race=="Black",1,0)
+cog_longda <- cog_longda[c("blsaid","blsavi","Memory","AV1451age","sex","pibgroup","dx","tau_blsavi","educ_years","race_bin","apoe4")]
+da <- merge(cog_longda,tauda, by=c("blsaid"), all.x=T)
+
+# load in volume data
+volume_spreadsheet_fname <- file.path(datapath,'mri_volume','BLSA_ROI-Volumes_SBIA_Aug2018_ICVadjusted_outlierRemoved.csv')
+volumeda <- read.csv(volume_spreadsheet_fname)
+#Braak I (entorhinal)
+volumeda$Entvol <- with(volumeda, X117ah + X116ah)
+#Braak II (hippocampus)
+volumeda$HCvol_LH <- volumeda$X48ah
+volumeda$HCvol_RH <- volumeda$X47ah
+volumeda$HCvol <- with(volumeda, HCvol_LH + HCvol_RH)
+#Braak III
+volumeda$PHGvol <- with(volumeda, X171ah + X170ah)
+volumeda$Fusvol <- with(volumeda, X123ah + X122ah)
+volumeda$LGvol <- with(volumeda, X135ah + X134ah)
+volumeda$Amygvol <- with(volumeda, X32ah + X31ah)
+volumeda$BraakIIIvol <- with(volumeda, PHGvol + Fusvol + LGvol + Amygvol)
+#Braak IV
+volumeda$ITGvol <- with(volumeda, X133ah + X132ah)
+volumeda$MTGvol <- with(volumeda, X155ah + X154ah)
+volumeda$TPvol <- with(volumeda, X203ah + X202ah)
+volumeda$Thalvol <- with(volumeda, X60ah + X59ah)
+volumeda$Caudvol <- with(volumeda, X37ah + X36ah)
+volumeda$PCCvol <- with(volumeda, X167ah + X166ah)
+volumeda$Insulavol <- with(volumeda, X103ah + X102ah + X173ah + X172ah)
+volumeda$BraakIVvol <- with(volumeda, ITGvol + MTGvol + TPvol + Thalvol + Caudvol + PCCvol + Insulavol)
+volumeda$BraakIII.IVvol <- with(volumeda, BraakIIIvol + BraakIVvol)
+#Braak V/VI
+volumeda$PreGvol <- with(volumeda, X182ah + X183ah)
+volumeda$PostGvol <- with(volumeda, X176ah + X177ah)
+volumeda$PreGmsvol <- with(volumeda, X150ah + X151ah)
+volumeda$PostGmsvol <- with(volumeda, X148ah + X149ah)
+volumeda$Cuneusvol <- with(volumeda, X114ah + X115ah)
+volumeda$BraakV.VIvol <- with(volumeda, PreGvol + PostGvol + PreGmsvol + PostGmsvol + Cuneusvol)
+volumeda <- volumeda[,c("blsaid","blsavi","Entvol","HCvol","BraakIIIvol","BraakIVvol","BraakIII.IVvol","BraakV.VIvol")]
+
+# add ages at MRI
+ageda_fname <- file.path(datapath,'mri_volume','dementvi2018q2.csv')
+ageda <- read.csv(ageda_fname)
+ageda$blsaid <- ageda$idno
+ageda$blsavi <- ageda$visit
+ageda$mri_age <- ageda$age
+ageda <- ageda[c("blsaid","blsavi","mri_age")]
+volumeda <- merge(volumeda,ageda, by=c("blsaid","blsavi"))
+volumeda <- merge(da, volumeda, by=c("blsaid","blsavi"))
+# clean up data frame
+volumeda <- volumeda[order(volumeda$blsaid,volumeda$blsavi),]
+volumeda$interval <- volumeda$mri_age-volumeda$AV1451age
+volumeda <- volumeda[(volumeda$interval<=1),] # remove structural mri scans more than 1 year after tau scan
+
+# remove outliers and subjects with MRI scan more than 2 years prior to tau scan
+outliers_id <- c(774,1012,1039,4854,5138,6054)
+for (subj in outliers_id) {
+  volumeda <- volumeda[!(volumeda$blsaid==subj),]
+}
+# Only baseline data
+volumeda <- volumeda[order(volumeda$blsaid,volumeda$blsavi),]
+volumeda$baseblsavi <- with(volumeda, ave(blsavi, blsaid, FUN=function(x) x[1])) # blsavi corresponding to baseline visit
+volumeda$is.baseline <- volumeda$blsavi==volumeda$baseblsavi
+volumeda_baseline <- volumeda[volumeda$is.baseline,]
+# count number of MRI scans per individual
+volumeda_baseline$vol_visits <- (volumeda %>% distinct(blsaid, blsavi) %>% count(blsaid))$n
+@
+\clearpage
+<<centering>>=
+# center independent variables for model interpretability
+independent_vars <- c("AV1451age","sex","pibgroup","educ_years","entorhinal","hippocampus","Braak.I.II","Braak.III.IV","Braak.V.VI","conjmask_suvr")
+for (var in independent_vars) {
+  volumeda[,paste0(var,"_c")] <- volumeda[,var] - mean(volumeda_baseline[,var], na.rm=T)
+}
+for (var in independent_vars) {
+  volumeda_baseline[,paste0(var,"_c")] <- volumeda_baseline[,var] - mean(volumeda_baseline[,var], na.rm=T)
+}
+@
+\clearpage
+% h! option specifies that we want the table here. LaTeX will override its internal option specifications to make this happen.
+\begin{table}[h!] 
+\centering
+\small
+\caption{Sample characteristics for continuous variables.}
+<<sample_characteristics_continuous, results='asis'>>=
+tab <- tabular( (`Age at base AV1451 scan`=AV1451age) + 
+                    (Education=educ_years) +
+                    (`No. MRI scans`=vol_visits) +
+                    (`Follow-up Time`=abs(interval)) +
+                    (`Braak I/II ROI tau SUVR`=Braak.I.II) +
+                    (`Braak III/IV ROI tau SUVR`=Braak.III.IV) +
+                    (`Braak V/VI ROI tau SUVR`=Braak.V.VI) ~
+                    (1+Factor(pibgroup,"PiB group",
+                              levelnames=c(paste("PiB-- (n=",sum(volumeda_baseline$pibgroup==0,na.rm=T),")",sep=""),
+                                           paste("PiB+ (n=",sum(volumeda_baseline$pibgroup==1,na.rm=T),")",sep=""))))*(
+                                             Paste(roundmean,roundsd,digits=2,head="Mean (SD)",sep=" (",postfix=")") +
+                                               Paste(roundmin,roundmax,digits=2,head="Range",sep="--\\hspace{-.5em}")),
+                  data=volumeda_baseline)
+save <- booktabs()
+latex(tab)
+@
+
+\end{table}
+\begin{table}[h!]
+\small
+\centering
+\caption{AV1451 group sample characteristics for categorical variables.}
+<<pibgroup_categorical_characteristics,results='asis', echo=FALSE>>=
+tab <- tabular(                 
+  Factor(sex,"Sex",levelnames=c("Female","Male")) +
+  Factor(apoe4,"APOE e4 status",levelnames=c("e4-","e4+")) +
+  Factor(race_bin,"Race",levelnames=c("Other","Black")) ~
+     (1+Factor(pibgroup,"PiB group",levelnames=c("PiB--","PiB+")))*(Paste(1,Percent("col"),digits=0,head="n (\\%)",sep=" (",postfix=")") ),
+                   data=volumeda_baseline)
+save <- booktabs( )
+latex(tab)
+@
+\end{table}
+\clearpage
+<<mriage_spaghetti>>=
+age_spaghetti <- ggplot(volumeda, aes(x=mri_age, y=Entvol, group=blsaid)) +
+                      geom_point(aes(color=as.factor(pibgroup)), size=1) +
+                      geom_line(aes(color=as.factor(pibgroup), linetype=as.factor(sex)), size=0.5) +
+                      scale_colour_manual(name="PiB group",
+                                values=c("#0072B2", "#D55E00"),
+                                labels=c("PiB-", "PiB+"),
+                                na.value="#999999") +
+                      scale_linetype_manual(name="sex", values=c("solid","dashed"), labels=c("female","male")) +
+                      xlab("Age at volumetric MRI") +
+                      ylab(bquote('Bilateral entorhinal volume '~(mm^3))) +
+                      theme_minimal(base_size = 10) +
+                      theme(legend.position="bottom", aspect.ratio=1)
+age_spaghetti
+@
+\clearpage
+<<interval_spaghetti>>=
+interval_spaghetti <- ggplot(volumeda, aes(x=interval, y=HCvol, group=blsaid)) +
+                          geom_point(aes(color=as.factor(pibgroup)), size=1) +
+                          geom_line(aes(color=as.factor(pibgroup), linetype=as.factor(sex)), size=0.5) +
+                          scale_colour_manual(name="PiB group",
+                                    values=c("#0072B2", "#D55E00"),
+                                    labels=c("PiB-", "PiB+"),
+                                    na.value="#999999") +
+                          scale_linetype_manual(name="sex", values=c("solid","dashed"), labels=c("female","male")) +
+                          xlab("Interval") +
+                          ylab("Bilateral hippocampal volume") +
+                          theme_minimal(base_size = 10) +
+                          theme(legend.position="bottom", aspect.ratio=1)
+interval_spaghetti
+@
+\clearpage
+<<individual_volageplots>>=
+p1 <- ggplot(volumeda, aes(factor(replicate),
+                             x = mri_age, y = HCvol,
+                             shape=factor(sex),
+                             color=factor(pibgroup))) +
+      geom_point(size=0.5) +
+      geom_smooth(method = 'lm', se = F, color="#000000", size = .3) +
+      #stat_fit_glance(method = 'lm',method.args = list(formula = y~x),geom = 'text',
+      #                aes(label = paste("p-value=", signif(..p.value.., digits = 2), sep = "")),
+      #                label.x.npc = "left", label.y.npc = "bottom", size = 1.5, inherit.aes = T, color="#000000") +
+      facet_wrap(~blsaid) +
+      #xlim(46,96) +
+      #ylim(-2,2) +
+      labs(title="Longitudinal hippocampal volume vs. age in tau sample",
+           x = "Age", y = "Bilateral volume (adjusted harmonized)",
+           color = "pibgroup", shape = "Sex") +
+      theme(legend.position = "bottom", aspect.ratio=1,
+            axis.text.x = element_text(size = 4),
+            axis.text.y = element_text(size = 5),
+            strip.text.x = element_text(size = 6))
+p1
+@
+\clearpage
+<<lme_models>>=
+fixef.formula <- substitute(paste0(outcome, " ~ AV1451age_c + sex_c + educ_years_c + pibgroup_c*interval + ",roi,"_c*interval"))
+randef <- as.formula("~1+interval|blsaid")
+lCtrl <- lmeControl(opt="optim",maxIter=100,msMaxIter=100,niterEM=50,msMaxEval=400)
+
+fits <- list()
+plots <- list()
+
+roi_list <- c("entorhinal","Braak.I.II","Braak.III.IV","Braak.V.VI","conjmask_suvr")
+outcome_list <- c("HCvol","Entvol","BraakIII.IVvol","BraakV.VIvol")
+
+for (outcome in outcome_list) {
+  for (roi in roi_list) {
+    fits[[outcome]][[roi]] <- lme(as.formula(eval(fixef.formula)),
+                                  random=randef, 
+                                  data=volumeda,
+                                  control=lCtrl,
+                                  na.action = na.exclude)
+    
+    newdata <- expand.grid(interval=c(-10,0),
+                           AV1451age_c=0,
+                           sex_c=0,
+                           educ_years_c=0,
+                           pibgroup_c=0,
+                           roi_placeholder=c(unique(quantile(volumeda_baseline[,paste0(roi,"_c")], c(.1,.9)))),
+                           roi.f=NA)
+    colnames(newdata)[colnames(newdata)=="roi_placeholder"] <- paste0(roi,"_c")
+    newdata$roi.f <- as.factor(newdata[,paste0(roi,"_c")])
+    newdata[paste0(outcome,"_pred")] <- predict(fits[[outcome]][[roi]], newdata, level=0)
+    
+    volumeda[paste0(roi,"_tertile")] <- as.character(ifelse(volumeda[,roi] > quantile(volumeda_baseline[,roi])[4], 3, 
+                                      ifelse(volumeda[,roi] < quantile(volumeda_baseline[,roi])[2], 1, 2)))
+    
+    volumeda[paste0(outcome,"_pred.ranef")] <- fits[[outcome]][[roi]]$fitted[,"blsaid"][match(rownames(volumeda),names(fits[[outcome]][[roi]]$fitted[,"blsaid"]))]
+    
+    plots[[outcome]][[roi]] <- ggplot(newdata, aes_string(x="interval", y=paste0(outcome,"_pred"), group="roi.f",color="roi.f")) +
+                               scale_color_manual(name=paste0("population-level\n",roi,"\nAV1451 SUVR"), values=c("#0072B2", "#D55E00"), labels=c("bottom decile", "top decile")) +
+                               geom_line(data=volumeda, aes_string(x="interval", y=paste0(outcome,"_pred.ranef"), group="blsaid"), color="gray") +
+                               #geom_line(size=1) +
+                               #ggtitle(roi) +
+                               xlab("Time prior to AV1451 scan (years)") +
+                               #xlim(c(-25,0)) +
+                               ylab(bquote('Hippocampal volume '~(mm^3))) +
+                               theme_bw(base_size=16) + theme(aspect.ratio = 1)
+  }
+}
+plots$HCvol$entorhinal
+@
+\clearpage
+<<lme_models_table, results='asis'>>=
+stargazer(fits$Entvol$entorhinal, fits$Entvol$Braak.III.IV, fits$Entvol$Braak.V.VI,
+          font.size="tiny",
+          dep.var.labels = "Bilateral hippocampal volume",
+          #covariate.labels = c("age","sex","amyloid group","time","entorhinal SUVR","Braak III/IV SUVR","Braak V/VI SUVR","amyloid group*time","entorhinal SUVR*time","Braak III/IV SUVR*time","Braak V/VI SUVR*time"),
+          report="vc*sp", 
+          star.cutoffs=c(0.05,0.01,0.001))
+          #out = "Q:/LBN/BABS/cogstore/cog1/home/jacob/tau_predictors/HAI2019/poster/vol_stargazer.htm")
+@
+\clearpage
+<<results='asis'>>=
+stargazer(fits$Entvol$entorhinal, fits$BraakIII.IVvol$Braak.III.IV, fits$BraakV.VIvol$Braak.V.VI,
+          font.size="tiny",
+          column.labels = c("Braak I","Braak III/IV","Braak V/VI"),
+          dep.var.labels = "Regional Volume",
+          report="vc*sp", 
+          star.cutoffs=c(0.05,0.01,0.001))
+@
+\clearpage
+<<results='asis'>>=
+stargazer(fits$Entvol$entorhinal, fits$HCvol$entorhinal,
+          font.size="small",
+          column.labels = c("Entorhinal cortex","Hippocampus"),
+          dep.var.labels = "Regional Volume",
+          #covariate.labels = c("age","sex","amyloid group","time","entorhinal SUVR","amyloid group x time","entorhinal SUVR x time"),
+          report="vc*sp", 
+          star.cutoffs=c(0.05,0.01,0.001),
+          out = "Q:/LBN/BABS/cogstore/cog1/home/jacob/tau_predictors/code/retrospective_volume/volumetable.htm")
+@
+\clearpage
+<<suvr_vol_plots>>=
+p1 <- ggplot(volumeda_baseline, aes(x=entorhinal, y=Entvol)) +
+        geom_point(aes(color=as.factor(pibgroup), shape=as.factor(sex)), size=1) +
+        scale_colour_manual(name="pibgroup",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+        scale_shape_manual(name="sex", values=c(19,15), labels=c("female","male")) +
+        geom_smooth(method = 'lm', aes(group = as.factor(pibgroup), colour=as.factor(pibgroup))) +
+        xlab("Entorhinal SUVR") +
+        ylab("Entorhinal volume") +
+        theme_minimal(base_size = 10) +
+        theme(legend.position="none", aspect.ratio=1)
+p2 <- ggplot(volumeda_baseline, aes(x=hippocampus, y=HCvol)) +
+        geom_point(aes(color=as.factor(pibgroup), shape=as.factor(sex)), size=1) +
+        scale_colour_manual(name="pibgroup",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+        scale_shape_manual(name="sex", values=c(19,15), labels=c("female","male")) +
+        geom_smooth(method = 'lm', aes(group = as.factor(pibgroup), colour=as.factor(pibgroup))) +
+        xlab("HIPP SUVR") +
+        ylab("HIPP volume") +
+        theme_minimal(base_size = 10) +
+        theme(legend.position="none", aspect.ratio=1)
+p3 <- ggplot(volumeda_baseline, aes(x=BraakIII, y=BraakIIIvol)) +
+        geom_point(aes(color=as.factor(pibgroup), shape=as.factor(sex)), size=1) +
+        scale_colour_manual(name="pibgroup",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+        scale_shape_manual(name="sex", values=c(19,15), labels=c("female","male")) +
+        geom_smooth(method = 'lm', aes(group = as.factor(pibgroup), colour=as.factor(pibgroup))) +
+        xlab("Braak III SUVR") +
+        ylab("Braak III volume") +
+        theme_minimal(base_size = 10) +
+        theme(legend.position="none", aspect.ratio=1)
+p4 <- ggplot(volumeda_baseline, aes(x=BraakIV, y=BraakIVvol)) +
+        geom_point(aes(color=as.factor(pibgroup), shape=as.factor(sex)), size=1) +
+        scale_colour_manual(name="pibgroup",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+        scale_shape_manual(name="sex", values=c(19,15), labels=c("female","male")) +
+        geom_smooth(method = 'lm', aes(group = as.factor(pibgroup), colour=as.factor(pibgroup))) +
+        xlab("Braak IV SUVR") +
+        ylab("Braak IV volume") +
+        theme_minimal(base_size = 10) +
+        theme(legend.position="bottom", aspect.ratio=1)
+multiplot(p1, p2, p3, p4, cols = 2)
+@
+\clearpage
+<<volume_change_plot>>=
+newdata_1 <- data.frame(blsaid=volumeda_baseline$blsaid,
+            interval=rep(0,nrow(volumeda_baseline)),
+            AV1451age_c=volumeda_baseline$AV1451age_c,
+            sex_c=volumeda_baseline$sex_c,
+            pibgroup_c=volumeda_baseline$pibgroup_c,
+            entorhinal_c=volumeda_baseline$entorhinal_c)
+
+newdata_2 <- data.frame(blsaid=volumeda_baseline$blsaid,
+            interval=rep(1,nrow(volumeda_baseline)),
+            AV1451age_c=volumeda_baseline$AV1451age_c,
+            sex_c=volumeda_baseline$sex_c,
+            pibgroup_c=volumeda_baseline$pibgroup_c,
+            entorhinal_c=volumeda_baseline$entorhinal_c)
+
+model <- lme(HCvol ~ AV1451age_c + sex_c + pibgroup_c*interval + entorhinal_c*interval, 
+             random=~1+interval|blsaid, 
+             data=volumeda,
+             control=lCtrl,
+             na.action = na.exclude)
+
+newdata_1$HCvol_pred <- predict(model, newdata_1)
+newdata_2$HCvol_pred <- predict(model, newdata_2)
+volumeda_baseline$HCvol_change <- newdata_2$HCvol_pred - newdata_1$HCvol_pred
+p1 <- ggplot(volumeda_baseline, aes(x=entorhinal, y=HCvol_change)) +
+      geom_point(size=3, color = "#000000") +
+      geom_smooth(method='lm', color="#000000", size = 2) +
+      xlab("Entorhinal AV1451 SUVR") +
+      ylab(bquote('Hippocampal volume rate of change'~(mm^3/year))) +
+      #ylab("") +
+      theme_bw(base_size=16)
+p1
+@
+
+
+\end{document}
