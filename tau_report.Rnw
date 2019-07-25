@@ -1,0 +1,1135 @@
+\documentclass[11pt]{article}
+
+\usepackage[top=.1in, left=.1in, right=.1in, bottom=.1in]{geometry}
+
+\usepackage{times}
+
+\usepackage{amsmath,amsfonts}
+\usepackage{color}
+
+\usepackage{caption}
+\usepackage{subfig}
+
+\usepackage{hyperref}
+\hypersetup{bookmarks=false, colorlinks=true, plainpages=false}
+
+\usepackage{booktabs}
+
+\usepackage{pdflscape}
+
+\usepackage{fullpage}
+
+\usepackage{float}
+
+\usepackage{chngcntr}
+\counterwithin{table}{section}
+\counterwithin{figure}{section}
+
+\title{Exploratory Analysis of tau PET Tracer AV-1451}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\subsection{Brief Literature Review}
+
+Noninvasive \textit{in vivo} examination of hyperphosphorylated tau in the brain is emerging as a critical tool for understanding healthy and pathological brain aging. The tracer flortaucipir (\textsuperscript{18}F-AV1451) is currently the most widely-utilized compound for measuring tau pathology in this way. Pharmacokinetic study has shown that AV1451 is highly suitable for quantifying hyperphosphorylated tau in PET imaging~\cite{Wooten2017} and its binding is robustly correlated with the spatial pattern of anti-tau antibodies used for analyzing tau pathology in \textit{post mortem} samples~\cite{Braak1995,Liang2016}. Further, early studies utilizing the compound in healthy older adults have observed tracer uptake that is comparable to the known pattern of tau spreading that occurs in aging~\cite{Villemagne2015}. AV1451 Standard Uptake Value Ratio (SUVR), a measure of tracer binding, is greater in MCI and AD patients than in healthy older controls, and tracer uptake in inferior temporal areas is associated with clinical impairment, consistent with \textit{post mortem} findings~\cite{Johnson2016}. The variability that has been observed in tau deposition between different clinical subtypes of Alzheimer's pathology is also detectable using the AV1451 tracer~\cite{Ossenkoppele2016}. However, off-target binding is common in PET tracers for tau; AV1451 has been observed to bind to pigmented and mineralized structures, MOA-A, and MOA-B~\cite{Saint-Aubert2017}. Thus, despite encouraging initial reports of the usefulness of the compound, it remains to be seen if AV1451 is a reliable tool for the measurement of tau pathology.
+
+Early study of the association of AV1451 uptake with potential correlates of tau have yielded intriguing albeit less than straightforward results. In cognitively normal older adults, voxelwise analysis of the association between AV1451 uptake and age revealed a positive correlation between the two in the entorhinal cortex, hippocampus, parahippocampal gyrus, basal forebrain, and insula~\cite{Scholl2016}. Greater AV1451 binding has been also correlated with older age in parrahippocampal, inferior temporal, fusiform, and posterior cingulate areas for MCI/AD subjects~\cite{Johnson2016}. But contrary to these and other studies, Koychev and colleagues~\cite{Koychev2017} found a negative association between age and AV1451 SUVR in several areas including the hippocampus and the occipital, parietal, and frontal cortices for subjects with probable AD. A negative association between age and AV1451 uptake across the neocortex has also been observed in individuals with probable MCI/AD, although this same cohort exhibited a positive AV1451-age association in the medial temporal lobe~\cite{Ossenkoppele2016}. Evidently, the relationship between binding of this tracer and age has not been clearly established. One possible interpretation is that tau does not accumulate in a simple linear fashion with age, but perhaps instead increases and then tapers off or is reduced in late stages of normal and diseased aging.
+
+To investigate possible relationships between tau and amyloid in the aging brain, associations between AV1451 and PiB uptake have also been examined. Voxelwise analysis  has revealed that in cognitively normal older adults, PiB uptake is associated with AV1451 SUVR throughout the brain including in the inferior and lateral temporal cortex, the medial and lateral parietal cortex, and the frontal cortex~\cite{Scholl2016}. This relationship is especially strong in the inferior temporal cortex, and has been demonstrated in both cognitively normal and MCI/AD individuals~\cite{Johnson2016}. Indeed, regional analysis has shown that these two tracers are correlated in the entorhinal cortex, thalamus, and parahippocampus for subjects with probable AD~\cite{Koychev2017}. It is notable that PiB and AV1451 binding are correlated in areas of the aging brain implicated in Braak tau pathology staging, consistent with the current understanding that amyloid may enable the spread of tau pathology. Though the precise way in which amyloid facilitates the spread of tau pathology is not fully understood, proposed mechanisms include downstream effects of amyloid binding to neuronal receptors/membranes, indirect consequences of inflammation, and cross-seeding/templating by A$\beta$ that triggers a prion-like spreading of tau pathology~\cite{Stancu2014}.
+
+Important differences in AD pathology between males and females have also been noted, rooted in sex-based endocrine and cerebrovascular factors. Overexpression of corticotropin releasing factor has been shown to lead to greater tau phosphorylation in female rats than male rats~\cite{Bangasser2017}. In contrast, cerebral microbleeds, associated with amyloid-$\beta$ containing vessels, are much more common in men than women~\cite{Finch2016}. Additionally, given evidence that hyperphosphorylation of tau aggregation is triggered by elevated ferric iron concentrations~\cite{Ward2014}, sex differences in the accumulation of iron with age~\cite{Persson2015} may explain potential differences between observed AV1451 uptake in men and women. However, almost all studies utilizing AV1451 to study tau pathology have failed to find any association of sex with tracer uptake, e.g.~\cite{Johnson2016,Scholl2016,Buckley2017}, though the variable of sex is often controlled for in models of tracer associations~\cite{Marks2017,Passamonti2017}.
+
+AV1451 binding may also be a useful predictor of cognitive ability in late-life. Scholl and colleagues~\cite{Scholl2016} showed that for cognitively normal older adults, greater AV1451 SUVR in Braak I/II was associated with poorer cross-sectional episodic memory as well as retrospective longitudinal decline. In subjects with probable AD, entorhinal AV1451 binding has been observed to interact with age to correlate with longitudinal cognitive decline~\cite{Koychev2017}. Greater tracer uptake in the hippocampus and other MTL areas predicts lower composite memory scores in probable MCI/AD individuals~\cite{Ossenkoppele2016}. In these same subjects, lower visuospatial cognitive performance was associated with increased AV1451 uptake in the occipital lobe and temporoparietal regions, while lower composite language scores were associated with greater AV1451 uptake in left temporoparietal regions typically associated with language function. In addition, subjective cognitive decline has been associated with greater tau burden in the entorhinal cortex even after accounting for the effect of greater mean cortical PiB DVR~\cite{Buckley2017}. However, despite these intriguing findings, these studies and others do not consistently report the same precise kinds of cognitive associations with AV1451 binding (i.e. cross-sectional vs. longitudinal data, different cognitive domains, etc.).
+
+\subsection{Report Overview}
+
+This analysis aimed to explore associations with AV1451 uptake in non-demented older adults (n=40) from the Baltimore Longitudinal Study of Aging (BLSA). In doing so, we wanted to evaluate to what extent data from our sample align with current hypotheses of tau spreading in the brain and with other studies examining AV1451 tracer binding in vivo. We were first interested in seeing if tracer binding was associated with age. A positive relationship between age and tracer uptake in Braak staging areas in our sample would lend support to the idea of AV1451 as a useful biomarker for cognitively-relevant tau pathology in aging. We also wanted to test if tracer uptake corresponded spatially to amyloid presence in our sample, given the current understanding of the close relationship between amyloid and tau pathology in neurodegeneration and the aging brain. In addition, we were interested to see if there were sex differences in AV1451 uptake in our sample. Finally, given the possible consequences of tau pathology for regional brain volumes and cognition, we tested correlations of AV1451 binding with these variables.
+
+To test these associations, we took a dual approach of regional and voxelwise analyses of the PET data. For voxelwise analysis, we used a combination of the SPM GUI and a python nipype pipeline to look at where in the brain tracer uptake correlated with potential covariates. From this, we identified regions of interest where we observed associations between AV1451 binding and the explanatory variables. We then used linear modeling to examine how age, PiB status, and sex correlated with MUSE-generated AV1451 SUVR values in composite regions of Braak I/II, III/IV, and V/VI. Next, we selected regions of interest for further analysis that we knew to be relevant for tau deposition (largely based on Braak tau staging), as well as regions where voxelwise data suggested tracer uptake was associated with age, PiB, and/or sex. After examining the distribution of AV1451 SUVR in our sample for each of these subregions, we tested the association between each explanatory variable and AV1451 uptake in each region both alone and together with other potential correlates. Finally, we examined whether tracer uptake correlated with scores from a variety of cognitive measures in regions where there was a positive association between AV1451 SUVR and age.
+
+Voxelwise analysis revealed a positive association between in age and tracer uptake in an area roughly corresponding to the lentiform nucleus, albeit only with a low significance threshold (Figure~\ref{fig:age+,pib_005}, pg. 6). In addition, age was negatively correlated with AV1451 uptake in the ventricles (Figure~\ref{fig:age-,pib_0001}, pg. 7). Subsequent regional analyses failed to show an association between age and AV1451 SUVR in any region of interest, other than a positive correlation in the lentiform nucleus.
+
+Using voxelwise data to look for areas where PiB+ subjects had greater AV1451 uptake than PiB- subjects, we observed widespread association between uptake of AV1451 and PiB positivity throughout the brain (Figure~\ref{fig:pib+,age_0001}, pg. 8). Regional analyses showed PiB positivity was associated with greater AV1451 SUVR in Braak stages III-VI, though not Braak I/II. Further, this association was seen in several areas implicated in Braak staging, including the entorhinal cortex, fusiform gyrus, inferior temporal cortex, precuneus, postcentral gyrus, middle frontal gyrus, pallidum, and putamen. When both PiB group and sex were used to explain AV1451 uptake, PiB group often correlated to a lesser degree than it did when explaining tracer binding alone.
+
+Voxelwise data also showed greater AV1451 SUVR in men than in women in areas throughout the brain (Figure~\ref{fig:male>female,pib_0001}, pg. 10). Further, in all of the regions of interest that we examined except for the entorhinal cortex, men showed significantly greater tracer binding than did women. This effect was quite robust in our sample but has not been demonstrated in prior studies.
+
+The observed negative association between age and AV1451 SUVR led us to hypothesize that lower regional brain volume and greater ventricle volume in age might be driving this unexpected result, related to the relatively low resolution of the PET imaging method. We determined that age was in fact associated with lower regional brain volume in the ROIs we examined, and we also observed a positive relationship between age and ventricle volume. In testing the association between AV1451 uptake and regional brain volume, we saw that AV1451 SUVR was negatively related to brain volume in only the inferior temporal gyrus, while the inverse association was in fact observed in the lentiform nucleus (Figure~\ref{fig:age_pib_vol}(c), pg. 29).
+
+Finally, though voxelwise and regional analyses indicated a positive association between age and AV1451 uptake in the lentiform nucleus, we failed to see an association between AV1451 SUVR and cognition in this region for any of the cognitive measures that we examined.
+
+<<Rlibs_opts, include=FALSE, cache=F>>=
+library(readxl)
+
+library(ppcor)
+
+library(lattice)
+library(ggplot2)
+library(ggpmisc)
+library(ggthemes)
+library(ggExtra)
+library(png)
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  plots <- c(list(...), plotlist)
+  numPlots = length(plots)
+  if (is.null(layout)) {
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    for (i in 1:numPlots) {
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+library(stargazer)
+library(xtable)
+library(tables) 
+
+roundmean <- function(x,n=2) {
+  round(mean(x,na.rm=T),digits=n)
+}
+
+roundsd <- function(x,n=2) {
+  round(sd(x,na.rm=T),digits=n)
+}
+
+roundmin <- function(x,n=2) {
+  round(min(x,na.rm=T),digits=n)
+}
+
+roundmax <- function(x,n=2) {
+  round(max(x,na.rm=T),digits=n)
+}
+
+library(knitr)
+opts_chunk$set(echo=F,
+               fig.width=6, fig.height=6, fig.path=paste('figures',.Platform$file.sep,sep=""), fig.align='center', fig.pos='h!',
+               out.width='1\\textwidth', fig.show='hold',
+               dev=c('pdf','png'), dpi=300, warning=FALSE, message=FALSE, tidy=FALSE,
+               cache=TRUE, autodep=TRUE)
+options(width=60)
+@
+
+<<inputs>>=
+readpetdata <- function(fname) {
+  da <- as.data.frame(read_excel(fname, skip=1))
+  colnames(da) <- make.names(colnames(da), unique=T)
+  da$blsaid <- as.numeric(substr(da$idvi,1,4))
+  da$blsavi <- as.numeric(substr(da$idvi,6,7)) + as.numeric(substr(da$idvi,9,9))/10
+  da
+}
+
+if (.Platform$OS.type=="unix") {
+  rootname <- paste(.Platform$file.sep, "Volumes/NIAIRP2", sep="")
+} else {
+  rootname <- paste("K:", .Platform$file.sep, sep="")
+}
+
+cogpath <- file.path(rootname,'LBN','BABS','cogstore','cog1')
+datapath <- file.path(cogpath,'home','jacob','tau_predictors','data')
+
+pibda_fname <- file.path(datapath,'pib','DVR_wlr_ROI.xlsx')
+pibda <- readpetdata(pibda_fname)
+colnames(pibda)[colnames(pibda)=="precuneus"] <- "PIBprecuneus"
+colnames(pibda)[colnames(pibda)=="mean.cortical"] <- "PIBmean.cortical"
+colnames(pibda)[colnames(pibda)=="hippocampus"] <- "PIBhippocampus"
+pibda$PIBentorhinal <- with(pibda, (Left.Ent...entorhinal.area + Right.Ent...entorhinal.area)/2)
+pibda$PIBfusiform <- with(pibda, (Left.FuG...fusiform.gyrus + Right.FuG...fusiform.gyrus)/2)
+pibda$PIBinferior.temporal <- with(pibda, (Left.ITG...inferior.temporal.gyrus + Right.ITG...inferior.temporal.gyrus)/2)
+pibda$PIBlentiform <- with(pibda, (Left.Pallidum + Right.Pallidum + Left.Putamen + Right.Putamen)/4)
+pibda$PIBpostcentral.gyrus <- with(pibda, (Left.PoG...postcentral.gyrus + Right.PoG...postcentral.gyrus)/2)
+pibda <- subset(pibda, select=c("blsaid","blsavi","PIBprecuneus","PIBmean.cortical","PIBhippocampus","PIBentorhinal","PIBfusiform","PIBinferior.temporal","PIBlentiform","PIBpostcentral.gyrus"))
+
+pibda$pibgroup <- 1*(pibda$PIBmean.cortical > 1.0620)
+
+covada_fname <- file.path(datapath,'PETstatus_18Oct2017.xlsx')
+covada <- as.data.frame(read_excel(covada_fname, na=""))
+covada <- covada[,c("blsaid","blsavi","AV1451age","sex","race","educ_years","apoe4gen","apoe4","dx","av1451currdx","excludePIB","excludeAV1451")]
+covada <- subset(covada, !is.na(AV1451age))
+covada$dx[is.na(covada$dx)] <- 0
+covada$av1451currdx[!is.na(covada$AV1451age) & is.na(covada$av1451currdx)] <- 0
+
+covada <- merge(covada, pibda, by=c("blsaid","blsavi"), all.x=T)
+
+muse_adjusted <- read.csv(file.path(datapath,'mri_volume','BLSA_ROI-Volumes_SBIA_Oct2017_ICVadjusted_outlierRemoved.csv'))
+
+roinames <- grep("^X[0-9]*a$",colnames(muse_adjusted), value=T)
+
+muse_adjusted <- subset(muse_adjusted,
+                        select=c("blsaid","blsavi",roinames))
+
+covada <- merge(covada, muse_adjusted, by=c("blsaid","blsavi"), all.x=T)
+
+#CVL data
+cvlda_fname <- file.path(datapath,'cog','CVL.csv')
+cvlda <- read.csv(cvlda_fname, na="")
+cvlda <- cvlda[,c("Idno","Visit","CVLtca","CVLfrs")]
+colnames(cvlda)[1:2] <- c("blsaid","blsavi")
+covada <- merge(covada, cvlda, by=c("blsaid","blsavi"), all=T)
+
+#digit span data
+digitspanda_fname <- file.path(datapath,'cog','DIGITSPAN.csv')
+digitspanda <- read.csv(digitspanda_fname, na="")
+digitspanda <- digitspanda[,c("Idno","Visit","Age","DigFor","DigBac")]
+colnames(digitspanda)[1:2] <- c("blsaid","blsavi")
+covada <- merge(covada, digitspanda, by=c("blsaid","blsavi"), all=T)
+
+# digit symbol data
+digitsymda_fname <- file.path(datapath,'cog','DIGITSYM.csv')
+digitsymda <- read.csv(digitsymda_fname, na="")
+digitsymda <- digitsymda[,c("Idno","Visit","DSSTot")]
+colnames(digitsymda)[1:2] <- c("blsaid","blsavi")
+covada <- merge(covada, digitsymda, by=c("blsaid","blsavi"), all=T)
+
+# trails a/b data
+trailsda_fname <- file.path(datapath,'cog','NEUTRAILS.csv')
+trailsda <- read.csv(trailsda_fname, na="")
+trailsda <- trailsda[,c("Idno","Visit","TRATS","TRBTS")]
+colnames(trailsda)[1:2] <- c("blsaid","blsavi")
+covada <- merge(covada, trailsda, by=c("blsaid","blsavi"), all=T)
+
+#pegboard data
+pegboardda_fname <- file.path(datapath,'cog','PEGBRD.csv')
+pegboardda <- read.csv(pegboardda_fname, na="")
+pegboardda <- pegboardda[,c("Idno","Visit","DomMean")]
+colnames(pegboardda)[1:2] <- c("blsaid","blsavi")
+covada <- merge(covada, pegboardda, by=c("blsaid","blsavi"), all=T)
+
+# function to read tau data and merge with covariates
+readtaudata <- function(fname, covariates=covada) {
+  da <- readpetdata(fname)
+  # Remove incomplete (erroneous) entries
+  da <- da[complete.cases(da),]
+  # Merge tau data with covariate data
+  m <- merge(da, covariates, by=c("blsaid","blsavi"), all.x=T)
+  m <- m[order(m$blsaid,m$blsavi),]
+  
+  m
+}
+
+# tau SUVR ROI means
+tauda_ROI_mean_fname <- file.path(datapath,'av1451','muse_labels','SUVR_ROI_mean.xlsx')
+tauda_ROI_mean <- readtaudata(tauda_ROI_mean_fname)
+tauda_ROI_mean$inferior.temporal <- with(tauda_ROI_mean, (Left.ITG...inferior.temporal.gyrus + Right.ITG...inferior.temporal.gyrus)/2)
+tauda_ROI_mean$cuneus <- with(tauda_ROI_mean, (Left.Cun...cuneus + Right.Cun...cuneus)/2)
+tauda_ROI_mean$postcentral.gyrus <- with(tauda_ROI_mean, (Left.PoG...postcentral.gyrus + Right.PoG...postcentral.gyrus)/2)
+tauda_ROI_mean$precuneus <- with(tauda_ROI_mean, (Left.PCu...precuneus + Right.PCu...precuneus)/2)
+tauda_ROI_mean$middle.frontal.gyrus <- with(tauda_ROI_mean, (Left.MFG...middle.frontal.gyrus + Right.MFG...middle.frontal.gyrus)/2)
+tauda_ROI_mean <- subset(tauda_ROI_mean,
+                         is.na(excludeAV1451) & is.na(excludePIB) & !is.na(pibgroup))
+                         #(av1451currdx==0)) # select only the visits with PiB, remove exclusions, only cog normals
+
+# Determine baseline visit (i.e., first AV1451 scan)
+tauda_ROI_mean <- tauda_ROI_mean[order(tauda_ROI_mean$blsaid,tauda_ROI_mean$blsavi),]
+tauda_ROI_mean$baseblsavi <- with(tauda_ROI_mean, ave(blsavi, blsaid, FUN=function(x) x[1])) # blsavi corresponding to baseline visit
+tauda_ROI_mean$is.baseline <- tauda_ROI_mean$blsavi==tauda_ROI_mean$baseblsavi
+
+# only baseline data
+tauda_ROI_mean_CS <- tauda_ROI_mean[tauda_ROI_mean$is.baseline,]
+@
+
+\clearpage
+
+\section{Sample characteristics}
+
+A sample of n=40 subjects (21 women) was available for analysis, with 38 cognitively normal subjects, 1 subject with MCI, and 1 subject with other impairment. For many analyses, we divided our sample into groups based on mean cortical PiB DVR. Subjects with mean cortical PiB DVR above 1.0620 were considered `PiB+', while those below this threshold were considered `PiB-'. 
+
+\begin{table}[h!]
+\centering
+\small
+\caption{Sample characteristics for continuous variables.}
+
+<<sample_characteristics_continuous, results='asis'>>=
+tab <- tabular( (`Age at base AV1451 scan`=AV1451age) + 
+                (Education=educ_years) +
+                (`Mean cortical PiB DVR`=PIBmean.cortical) +
+                (`Braak I/II ROI tau SUVR`=Braak.I.II) +
+                (`Braak III/IV ROI tau SUVR`=Braak.III.IV) +
+                (`Braak V/VI ROI tau SUVR`=Braak.V.VI) ~
+                  (1+Factor(pibgroup,"PiB group",
+                            levelnames=c(paste("PiB-- (n=",sum(tauda_ROI_mean_CS$pibgroup==0,na.rm=T),")",sep=""),
+                                         paste("PiB+ (n=",sum(tauda_ROI_mean_CS$pibgroup==1,na.rm=T),")",sep=""))))*(
+                     Paste(roundmean,roundsd,digits=2,head="Mean (SD)",sep=" (",postfix=")") +
+                     Paste(roundmin,roundmax,digits=2,head="Range",sep="--\\hspace{-.5em}")),
+                data=tauda_ROI_mean_CS)
+save <- booktabs()
+latex(tab)
+@
+
+\label{tab:sample_characteristics_continuous} 
+
+\end{table}
+
+\begin{table}[h!]
+\small
+\centering
+\caption{Sample characteristics for categorical variables.}
+<<sample_characteristics_categorical,results='asis',echo=FALSE>>=
+tab <- tabular(                 
+  Factor(sex,"Sex",levelnames=c("Female","Male")) +
+  Factor(race,"Race",levelnames=c("Black","White", "Other NonWhite")) +
+  Factor(apoe4,"APOE e4 status",levelnames=c("e4-","e4+")) +
+                 Factor(av1451currdx,"Diagnosis at AV1451 scan") +
+                 Factor(dx,"Diagnosis at last BLSA visit") ~ 
+                   (1+Factor(pibgroup,"PiB group",levelnames=c("PiB--","PiB+")))*(
+                     Paste(1,Percent("col"),digits=0,head="n (\\%)",sep=" (",postfix=")") ),
+                 data=tauda_ROI_mean_CS)
+save <- booktabs()
+latex(tab)
+@
+\label{tab:sample-characteristics-categorical}
+\end{table}
+
+\clearpage
+
+\section{Voxelwise Analysis of AV1451 Correlation with Age, PiB status, and Sex}
+
+The following figures describe the results of voxelwise analysis to determine the spatial location and strength of associations between AV1451 SUVR and age, PiB status, and sex. The maps of are pdf outputs generated by SPM12, with results visualized both in a ``glass brain'' and superimposed on the BLSA template.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=.7\textwidth]{Q:/LBN/BABS/cogstore/cog1/home/jacob/tau_predictors/code/report/vxlwise_images/age+pib_005.png}
+  \caption{Voxels where age is positively correlated with AV1451 SUVR, controlling for PiB status (p $<$ 0.05, uncorrected). Significant voxels fall roughly within the bilateral lentiform nucleus (pallidum + putamen). Notably, suprathreshold clusters disappear when a significance threshold of p $<$ 0.001 is used.}
+  \label{fig:age+,pib_005}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=.8\textwidth]{Q:/LBN/BABS/cogstore/cog1/home/jacob/tau_predictors/code/report/vxlwise_images/age-,pib_0001.png}
+  \caption{Voxels where age is negatively correlated with AV1451 SUVR, controlling for PiB status (p $<$ 0.001, uncorrected). This association exists mainly in voxels in and around the ventricles.}
+  \label{fig:age-,pib_0001}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=.8\textwidth]{Q:/LBN/BABS/cogstore/cog1/home/jacob/tau_predictors/code/report/vxlwise_images/pib+,age_0001.png}
+  \caption{Voxels where AV1451 SUVR is significantly greater in PiB+ subjects than PiB- subjects, controlling for age (p $<$ 0.001, uncorrected). Voxels appear widespread across the brain, though particularly in temporal regions typical of early Braak staging.}
+  \label{fig:pib+,age_0001}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=.8\textwidth]{Q:/LBN/BABS/cogstore/cog1/home/jacob/tau_predictors/code/report/vxlwise_images/age+,pib_pib+,age_005.png}
+  \caption{Voxels where (1) age is positively correlated with AV1451 SUVR controlling for PiB status and (2) AV4151 SUVR is significantly greater in PiB+ subjects than PiB- subjects controlling for age (p $<$ 0.05, uncorrected). This conjunction map describes voxels where SUVR is associated with both increasing age and PiB postivity. Voxels again roughly comprise the lentiform nucleus, though these associations are also seen in occipital and parietal cortical areas, albeit with a relatiely low significance threshold.}
+  \label{fig:age+,pib_pib+,age_005}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=.8\textwidth]{Q:/LBN/BABS/cogstore/cog1/home/jacob/tau_predictors/code/report/vxlwise_images/male+female,pib_001.png}
+  \caption{Voxels where AV1451 SUVR is significantly greater in men than women, controlling for PiB status (p $<$ 0.001, uncorrected). This association is present across the brain and survives high significance thresholds.}
+  \label{fig:male>female,pib_0001}
+\end{figure}
+
+\clearpage
+\newgeometry{top=0.5in,bottom=0.5in}
+\section{Braak-based Analysis of AV1451 Correlation with Age, PiB Status, and Sex}
+
+Braak stages describe a widely-accepted hypothesis for tau spreading in the brain, with tau pathology beginning in temporal and cingulate areas and progressing to parietal and frontal regions over time~\cite{Braak1995}. We defined Braak I/II as both the entorhinal cortex and hippocampus. Braak III/IV was defined as a composite of the parahippocampal gyrus, fusiform gyrus, lingual gyrus, amygdala, middle temporal gyrus, temporal pole, thalamus, anterior cingulate gyrus, middle cingulate gyrus, inferior temporal gyrus, posterior cingulate gyrus, and posterior insula. We defined Braak V/VI as comprising the postcentral gyrus, postcentral gyrus medial segment, precentral gyrus, precentral gyrus medial segment, and the cuneus.
+
+We would most likely expect to see AV1451 SUVR positively correlated with age particularly in Braak I and II areas because our subjects are non-demented and likely do not have advanced tau pathology. However, we did not observe any relationship between age and tracer uptake in a composite of Braak I/II, Braak III/IV, or Braak V/VI
+(Figure~\ref{fig:plot_braak_age}).
+
+\subsection{AV1451 Uptake by Braak Staging Group}
+
+<<plot_braak_age, fig.cap="Scatterplots of SUVR, age, PiB group, and sex">>=
+p1 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=Braak.I.II)) + 
+      geom_point(aes(shape=as.factor(dx), colour=as.factor(pibgroup)))+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Clinical Diagnosis",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("Age") +
+  	  ylab("Braak I/II ROI") +
+      #labs(caption="*age is significant, See Table 3") +
+      #ylim(c(0.85,1.45)) +
+      geom_smooth(method = 'lm') +
+      theme_minimal() +
+      theme(legend.position="none", aspect.ratio=.5)
+
+p2 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=Braak.III.IV)) + 
+      geom_point(aes(shape=as.factor(dx), colour=as.factor(pibgroup)))+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+")) +
+      scale_shape_manual(name="Clinical Diagnosis",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+      geom_smooth(method = 'lm') +
+      xlab("Age") +
+  	  ylab("Braak III/IV ROI") +
+      #labs(caption="*PiB group is significant, see Table 4") +
+      #ylim(c(0.85,1.45)) +
+      theme_minimal()  +
+      theme(legend.position="none", aspect.ratio=.5)
+
+p3 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=Braak.V.VI)) + 
+  	  geom_point(aes(shape=as.factor(dx), colour=as.factor(pibgroup)))+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+")) +
+ 
+      scale_shape_manual(name="Clinical Diagnosis",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+      geom_smooth(method = 'lm') +
+  	  xlab("Age") +
+  	  ylab("Braak V/VI ROI") +
+      #ylim(c(0.85,1.45)) +
+      theme_minimal() +
+      theme(legend.position="none", aspect.ratio=.5)
+
+p4 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=Braak.I.II)) + 
+  	  geom_point(aes(shape=as.factor(dx), colour=as.factor(sex)))+
+      scale_colour_manual(name="sex",
+                          values=c("green", "red"),
+                          labels=c("male", "female")) +
+      scale_shape_manual(name="Clinical Diagnosis",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+      geom_smooth(method = 'lm') +
+  	  xlab("Age") +
+  	  ylab("Braak V/VI ROI") +
+      #labs(caption="*sex is significant, see Table 5") +
+      #ylim(c(0.85,1.45)) +
+      theme_minimal() +
+      theme(legend.position="none", aspect.ratio=.5)
+
+p5 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=Braak.III.IV)) + 
+  	  geom_point(aes(shape=as.factor(dx), colour=as.factor(sex)))+
+      scale_colour_manual(name="sex",
+                          values=c("green", "red"),
+                          labels=c("male", "female")) +
+      scale_shape_manual(name="Clinical Diagnosis",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+  	  xlab("Age") +
+  	  ylab("Braak V/VI ROI") +
+      geom_smooth(method = 'lm') +
+      #labs(caption="*sex is significant, see Table 5") +
+      #ylim(c(0.85,1.45)) +
+      theme_minimal() +
+      theme(legend.position="none", aspect.ratio=.5)
+
+p6 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=Braak.V.VI)) + 
+  	  geom_point(aes(shape=as.factor(dx), colour=as.factor(sex)))+
+      scale_colour_manual(name="sex",
+                          values=c("green", "red"),
+                          labels=c("male", "female")) +
+      scale_shape_manual(name="Clinical Diagnosis",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+  	  xlab("Age") +
+  	  ylab("Braak V/VI ROI") +
+      geom_smooth(method = 'lm') +
+      #labs(caption="*sex is significant, see Table 5") +
+      #ylim(c(0.85,1.45)) +
+      theme_minimal() +
+      theme(legend.position="none", aspect.ratio=.5)
+
+p7 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=Braak.V.VI, group=blsaid)) + 
+  	  geom_point(aes(colour=as.factor(sex)))+
+      scale_colour_manual(name="sex",
+                          values=c("green", "red"),
+                          labels=c("male", "female")) +
+      theme_minimal() +
+      theme(legend.position="top", legend.direction="vertical", aspect.ratio=0,
+            legend.key.height=unit(.01,"cm"),
+            axis.line=element_blank(),
+            axis.text.x=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks=element_blank(),
+            axis.title.x=element_blank(),
+            axis.title.y=element_blank(),
+            panel.background=element_blank(),
+            panel.border=element_blank(),
+            panel.grid.major=element_blank(),
+            panel.grid.minor=element_blank(),
+            plot.background=element_blank())
+
+p8 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=Braak.V.VI, group=blsaid)) + 
+  	  geom_point(aes(shape=as.factor(dx), colour=as.factor(pibgroup)))+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+")) +
+      scale_shape_manual(name="Clinical Diagnosis",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+      theme_minimal() +
+      theme(legend.position="top", legend.direction="vertical", aspect.ratio=0,
+            legend.key.height=unit(.01,"cm"),
+            axis.line=element_blank(),
+            axis.text.x=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks=element_blank(),
+            axis.title.x=element_blank(),
+            axis.title.y=element_blank(),
+            panel.background=element_blank(),
+            panel.border=element_blank(),
+            panel.grid.major=element_blank(),
+            panel.grid.minor=element_blank(),
+            plot.background=element_blank())
+
+multiplot(p1, p2, p3, p8, p4, p5, p6, p7, cols=2)
+@
+
+\clearpage
+
+<<age_sex_pib_linear_models>>=
+fit.age.lm1 <- lm(Braak.I.II ~ 1 + AV1451age, data=tauda_ROI_mean_CS)
+fit.pib.lm1 <- lm(Braak.I.II ~ 1 + pibgroup, data=tauda_ROI_mean_CS)
+fit.sex.lm1 <- lm(Braak.I.II ~ 1 + sex, data = tauda_ROI_mean_CS)
+fit.age.pib.lm1 <- lm(Braak.I.II ~ 1 + AV1451age + pibgroup, data=tauda_ROI_mean_CS)
+fit.pib.sex.lm1 <- lm(Braak.I.II ~ 1 + pibgroup + sex, data = tauda_ROI_mean_CS)
+fit.age.sex.lm1 <- lm(Braak.I.II ~ 1 + AV1451age + sex, data=tauda_ROI_mean_CS)
+fit.age.lm2 <- lm(Braak.III.IV ~ 1 + AV1451age, data=tauda_ROI_mean_CS)
+fit.pib.lm2 <- lm(Braak.III.IV ~ 1 + pibgroup, data=tauda_ROI_mean_CS)
+fit.sex.lm2 <- lm(Braak.III.IV ~ 1 + sex, data = tauda_ROI_mean_CS)
+fit.age.pib.lm2 <- lm(Braak.III.IV ~ 1 + AV1451age + pibgroup, data=tauda_ROI_mean_CS)
+fit.age.sex.lm2 <- lm(Braak.III.IV ~ 1 + AV1451age + sex, data=tauda_ROI_mean_CS)
+fit.pib.sex.lm2 <- lm(Braak.III.IV ~ 1 + pibgroup + sex, data = tauda_ROI_mean_CS)
+fit.age.lm3 <- lm(Braak.V.VI ~ 1 + AV1451age, data=tauda_ROI_mean_CS)
+fit.pib.lm3 <- lm(Braak.V.VI ~ 1 + pibgroup, data=tauda_ROI_mean_CS)
+fit.sex.lm3 <- lm(Braak.V.VI ~ 1 + sex, data = tauda_ROI_mean_CS)
+fit.age.pib.lm3 <- lm(Braak.V.VI ~ 1 + AV1451age + pibgroup, data=tauda_ROI_mean_CS)
+fit.age.sex.lm3 <- lm(Braak.V.VI ~ 1 + AV1451age + sex, data=tauda_ROI_mean_CS)
+fit.pib.sex.lm3 <- lm(Braak.V.VI ~ 1 + pibgroup + sex, data = tauda_ROI_mean_CS)
+@
+
+\clearpage
+
+\begin{landscape}
+\newgeometry{margin=0.75in,top=2.5in}
+\subsection{Age, Sex, and PiB associations with SUVR in Braak Regions}
+
+\setlength\tabcolsep{2pt}
+
+Neither age, PiB group, or sex are associated with AV1451 uptake in Braak I/II when these variables are analyzed separately (Models 1, 2, 3) or when incorporating two explanatory variables (Models 4, 5, 6). However,  In a model where both age and PiB group explain SUVR (Model 4), there is in fact a trend-level negative association between SUVR and age (p = 0.071).
+
+<<age_lm_table1, results='asis'>>=
+stargazer(fit.age.lm1, fit.pib.lm1, fit.sex.lm1, fit.age.pib.lm1, fit.age.sex.lm1, fit.pib.sex.lm1, title = "GLMs of Correlates of AV1451 Uptake in Braak I/II ROI", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))#, float.env = "sidewaystable")
+@
+\end{landscape}
+\clearpage
+\begin{landscape}
+\newgeometry{margin=0.75in,top=2.5in}
+\setlength\tabcolsep{1pt}
+
+AV1451 SUVR is also not correlated with age in a composite of Braak III/IV (Model 1). However, PiB+ subjects have significantly greater tracer uptake than PiB- subjects both alone (Model 2) and when age is a covariate (Model 4). This relationship is weakened but still significant with sex as a covariate (Model 6), suggesting that sex differences may be partially driving the relationship between PiB group and tracer uptake. Indeed, men show significantly greater tracer uptake than women both alone (Model 3) and when age is a covariate (Model 5).
+
+<<age_lm_table2, results='asis'>>=
+stargazer(fit.age.lm2, fit.pib.lm2, fit.sex.lm2, fit.age.pib.lm2, fit.age.sex.lm2, fit.pib.sex.lm2, title = "GLMs of Correlates of AV1451 Uptake in Braak III/IV ROI", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))
+@
+\end{landscape}
+\clearpage
+\begin{landscape}
+\setlength\tabcolsep{2pt}
+\newgeometry{margin=0.4in,top=2in}
+%\addtolength{\oddsidemargin}{-.5in}
+%\addtolength{\evensidemargin}{-.5in}
+%\addtolength{\textwidth}{1in}
+
+Similar assocations between AV1451 SUVR, age, PiB status, and sex observed in Braak III/IV are also seen in Braak V/VI. PiB+ subjects show greater uptake than PiB- subjects (Model 2), though a model where age and PiB group explain AV1451 uptake is not significant (Model 4). Notably, PiB group significantly explains tracer uptake alone (Model 3) and with age (Model 5) but not when sex is a covariate (Model 6). This final model perhaps indicates once again that sex is a driving factor in the relationship observed between PiB group and AV1451 SUVR in this region.
+
+<<age_lm_table3, results='asis'>>=
+stargazer(fit.age.lm3, fit.pib.lm3, fit.sex.lm3, fit.age.pib.lm3, fit.age.sex.lm3, fit.pib.sex.lm3, title = "GLMs of Correlates of AV1451 Uptake in Braak V/VI ROI", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))
+@
+
+Overall, we do not see the expected relationship between AV1451 uptake and age in any Braak region. We do observe a main effect between SUVR and PiB+ status in Braak III-VI, but interestingly not in Braak I/II. Men also show greater tracer binding than women in Braak III-VI but not in Braak I/II.
+\end{landscape}
+\clearpage
+
+\section{Exploratory ROI Analysis Based on Voxelwise and Braak Results}
+
+Given our findings from voxelwise analysis of AV1451 SUVR correlations with age and PiB status and results from looking at these correlations in regions of composite Braak stages, we decided to look more in depth at specific regions of interest that were relevant to these variables.
+
+The pallidum and putamen were identified from voxelwise analysis as areas where both age and PiB status were postively associated with AV1451 SUVR. We also chose to examine the middle frontal gyrus as a region where voxelwise data showed AV1451 uptake was greater for men as well as PiB+ subjects, though this last finding may be driven by sex difference. The entorhinal cortex was selected as a region from Braak I, the fusiform gyrus from Braak III, the inferior temporal cortex from Braak IV,  the precuneus from Braak V, and the postcentral gyrus from Braak VI. The hippocampus, a Braak II region, was not analyzed because of suspected nonspecific AV1451 binding in the adjacent choroid plexus.
+
+\subsection{Histograms of AV1451 SUVR in ROIs}
+
+Histograms of tracer uptake in these regions of interest show that SUVR in these regions for most subjects is above 1.0, the value for the amount of tracer in the cerebellum to which other regions are normalized. In particular, SUVR tends to be high in the inferior temporal gyrus, and especially in the pallidum and putamen.
+
+<<ROI_histograms>>=
+par(mfrow = c(3, 3))
+par(pin=c(1,1))
+h1 <- hist(tauda_ROI_mean_CS$entorhinal,
+                  breaks=6,
+                  main="Entorhinal",
+                  xlab=NULL,
+                  border="black",
+                  col="#0072B2",
+                  las=1)
+h2 <- hist(tauda_ROI_mean_CS$fusiform,
+                  breaks=6,
+                  main="Fusiform",
+                  xlab=NULL,
+                  ylab=NULL,
+                  border="black",
+                  col="#D55E00",
+                  las=1)
+h3 <- hist(tauda_ROI_mean_CS$inferior.temporal,
+                  breaks=6,
+                  main="Inferior Temporal",
+                  xlab=NULL,
+                  ylab=NULL,
+                  border="black",
+                  col="green",
+                  las=1)
+h4 <- hist(tauda_ROI_mean_CS$precuneus,
+                  breaks=6,
+                  main="Precuneus",
+                  xlab=NULL,
+                  border="black",
+                  col="yellow",
+                  las=1)
+h5 <- hist(tauda_ROI_mean_CS$postcentral.gyrus,
+                  breaks=6,
+                  main="Postcentral Gyrus",
+                  xlab=NULL,
+                  ylab=NULL,
+                  border="black",
+                  col="blue",
+                  las=1)
+h6 <- hist(tauda_ROI_mean_CS$middle.frontal.gyrus,
+                  breaks=6,
+                  main="Middle Frontal",
+                  xlab="AV1451 SUVR",
+                  ylab=NULL,
+                  border="black",
+                  col="red",
+                  las=1)
+h7 <- hist(tauda_ROI_mean_CS$pallidum,
+                  breaks=6,
+                  main="Pallidum",
+                  xlab="AV1451 SUVR",
+                  border="black",
+                  col="purple",
+                  las=1)
+h8 <- hist(tauda_ROI_mean_CS$putamen,
+                  breaks=6,
+                  main="Putamen",
+                  xlab="AV1451 SUVR",
+                  ylab=NULL,
+                  border="black",
+                  col="pink",
+                  las=1)
+@
+
+\clearpage
+
+\newgeometry{margin=1in}
+
+\subsection{Associations of Age, PiB Group, and Sex with AV1451 SUVR in ROIs}
+
+In the following linear models, age was introduced as an independent variable along with either PiB group or sex in each of the ROIs to test for associations between these variables and AV1451 uptake. Age was positively correlated with AV1451 SUVR in the pallidum and putamen when sex was included in the model (Table 5.2, Models 6, 8), but not when PiB group was included. This suggests that differences in AV1451 uptake between PiB+ and PiB- subjects may be driving the association seen between age and AV1451 uptake, though notably there is no main effect of age by PiB group (p = 0.21). PiB+ status was found to correlate with AV1451 SUVR in the entorhinal cortex (Table 5.1, Model 1), fusiform gyrus (Table 5.1, Model 3), inferior temporal gyrus (Table 5.1, Model 5), precuneus (Table 5.1, Model 7), middle frontal gyrus (Table 5.2, Model 3), pallidum (Table 5.2, Model 5), and the putamen (Table 5.2, Model 7). Except for in the entorhinal cortex (Table 5.1, Model 2), men also had significantly greater AV1451 uptake in all of these regions (Table 5.1, Models 4, 6, 8; Table 5.2 Models 4, 6, 8) as well as in the postcentral gyrus (Table 5.2, Model 2).  Overall, these results were consistent with our voxelwise findings, but the strong association between SUVR and sex as well as the lack of widespread association with age was contrary to what we expected based on the available literature.
+
+\begin{landscape}
+
+<<ROI_associations>>=
+fit.entorhinal.age.pib <- lm(entorhinal ~ 1 + AV1451age + pibgroup, data = tauda_ROI_mean_CS)
+fit.entorhinal.age.sex <- lm(entorhinal ~ 1 + AV1451age + sex, data = tauda_ROI_mean_CS)
+fit.fusiform.age.pib <- lm(fusiform ~ 1 + AV1451age + pibgroup, data = tauda_ROI_mean_CS)
+fit.fusiform.age.sex <- lm(fusiform ~ 1 + AV1451age + sex, data = tauda_ROI_mean_CS)
+fit.inferior.temporal.age.pib <- lm(inferior.temporal ~ 1 + AV1451age + pibgroup, data = tauda_ROI_mean_CS)
+fit.inferior.temporal.age.sex <- lm(inferior.temporal ~ 1 + AV1451age + sex, data = tauda_ROI_mean_CS)
+fit.precuneus.age.pib <- lm(precuneus ~ 1 + AV1451age + pibgroup, data = tauda_ROI_mean_CS)
+fit.precuneus.age.sex <- lm(precuneus ~ 1 + AV1451age + sex, data = tauda_ROI_mean_CS)
+fit.postcentral.gyrus.age.pib <- lm(postcentral.gyrus ~ 1 + AV1451age + pibgroup, data = tauda_ROI_mean_CS)
+fit.postcentral.gyrus.age.sex <- lm(postcentral.gyrus ~ 1 + AV1451age + sex, data = tauda_ROI_mean_CS)
+fit.MFG.age.pib <- lm(middle.frontal.gyrus ~ 1 + AV1451age + pibgroup, data = tauda_ROI_mean_CS)
+fit.MFG.age.sex <- lm(middle.frontal.gyrus ~ 1 + AV1451age + sex, data = tauda_ROI_mean_CS)
+fit.pallidum.age.pib <- lm(pallidum ~ 1 + AV1451age + pibgroup, data = tauda_ROI_mean_CS)
+fit.pallidum.age.sex <- lm(pallidum ~ 1 + AV1451age + sex, data = tauda_ROI_mean_CS)
+fit.putamen.age.pib <- lm(putamen ~ 1 + AV1451age + pibgroup, data = tauda_ROI_mean_CS)
+fit.putamen.age.sex <- lm(putamen ~ 1 + AV1451age + sex, data = tauda_ROI_mean_CS)
+fit.lentiform.age.pib <- lm(lentiform ~ 1 + AV1451age + pibgroup, data = tauda_ROI_mean_CS)
+fit.lentiform.age.sex <- lm(lentiform ~ 1 + AV1451age + sex, data = tauda_ROI_mean_CS)
+@
+\clearpage
+<<ROI_associations_results_tables, results = 'asis'>>=
+stargazer(fit.entorhinal.age.pib, fit.entorhinal.age.sex, fit.fusiform.age.pib, fit.fusiform.age.sex, fit.inferior.temporal.age.pib, fit.inferior.temporal.age.sex, fit.precuneus.age.pib, fit.precuneus.age.sex, dep.var.labels = c("Entorhinal SUVR","Fusiform SUVR","Inferior Temporal SUVR","Precuneus SUVR"), title = "Associations with AV1451 SUVR in ROIs", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))
+@
+\clearpage
+<<ROI_associations_results_tables1, results = 'asis'>>=
+stargazer(fit.postcentral.gyrus.age.pib, fit.postcentral.gyrus.age.sex, fit.MFG.age.pib, fit.MFG.age.sex, fit.pallidum.age.pib, fit.pallidum.age.sex, fit.putamen.age.pib, fit.putamen.age.sex, dep.var.labels = c("Postcenral Gyrus SUVR","Middle Frontal Gyrus SUVR","Pallidum SUVR","Putamen SUVR"), title = "Associations with AV1451 SUVR in ROIs", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))
+@
+
+\clearpage
+
+\section{Volumetric Associations with Age}
+
+\subsection{ROIs from tau voxelwise analysis and Braak staging}
+
+Because of the unexpected results we obtained particularly with respect to age, we wanted to test as a ``sanity check'' if there was indeed a negative association between age and volume in these regions of interest. We confirmed that greater age did in fact generally correlate with lower volume in these ROIs, though this relationship did not reach significance in the inferior temporal cortex, precuneus, or the lentiform nucleus.
+
+<<age_vs_vol>>=
+fit.entorhinalvol.age <- lm(I((X116a+X117a)/1000) ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.fusiformvol.age <- lm(I((X122a+X123a)/1000) ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.inferiortemporalvol.age <- lm(I((X132a+X133a)/1000) ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.precuneusvol.age <- lm(I((X168a+X169a)/1000) ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.postcentralgyrusvol.age <- lm(I((X176a+X177a)/1000) ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.lentiformvol.age <- lm(I((X55a+X56a+X57a+X58a)/1000) ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+@
+
+<<Volumetric_associations_results_tables, results = 'asis'>>=
+stargazer(fit.entorhinalvol.age, fit.fusiformvol.age, fit.inferiortemporalvol.age, fit.precuneusvol.age, fit.postcentralgyrusvol.age, fit.lentiformvol.age, dep.var.labels = c("Entorhinal","Fusiform","Inferior Temporal","Precuneus","Postcentral Gyrus","Lentiform"), title = "Age and Volume Associations in ROIs", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))
+@ 
+
+\end{landscape}
+
+\clearpage
+
+\subsection{Ventricles and Age}
+
+We also suspected that increased ventricle size with age may be driving the observed negative association between age and AV1451 SUVR, stemming from the relatively low resolution of the PET data. We showed that there was indeed a strong positive relationship between age and ventricular volume in our sample. Still, we cannot be sure that this is what is causing the unexpected age-SUVR relationship.
+
+<<ventricles_age, results = 'asis'>>=
+fit.vent.vol <- lm(I((X4a+X11a+X49a+X50a+X51a+X52a)/1000) ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+stargazer(fit.vent.vol, dep.var.labels = c("Ventricular Volume"), title = "Association between ventricle volume and age", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))
+@
+\clearpage
+
+\begin{landscape}
+
+\section{Cognitive Associations in Select ROIs}
+
+In areas where age was in fact positively correlated with tracer uptake, we wanted to test if this uptake was associated with cognitive outcomes. We tested whether AV1451 uptake in the putamen, pallidum, and the composite lentiform nucleus was correlated with scores from cognitive tests known to correlate with other brain markers of aging and disease, including the California Verbal Learning test, Digits Forward, Digits Backward, and Digit Symbol Substitution. Though SUVR was negatively correlated with cognitive score in nearly all of the measures analyzed, none of these models were statistically significant and so we concluded there was no association between AV1451 uptake and cognition in these regions.
+
+<<ROI_cognitive_associations>>=
+fit.cvltca.putamen <- lm(CVLtca ~ 1 + putamen, data = tauda_ROI_mean_CS)
+fit.cvlfrs.putamen <- lm(CVLfrs ~ 1 + putamen, data = tauda_ROI_mean_CS)
+fit.trlsa.putamen <- lm(TRATS ~ 1 + putamen, data=tauda_ROI_mean_CS)
+fit.trlsb.putamen <- lm(TRBTS ~ 1 + putamen, data=tauda_ROI_mean_CS)
+fit.pgbrd.putamen <- lm(DomMean ~ 1 + putamen, data=tauda_ROI_mean_CS)
+fit.cvltca.pallidum <- lm(CVLtca ~ 1 + pallidum, data = tauda_ROI_mean_CS)
+fit.cvlfrs.pallidum <- lm(CVLfrs ~ 1 + pallidum, data = tauda_ROI_mean_CS)
+fit.trlsa.pallidum <- lm(TRATS ~ 1 + pallidum, data=tauda_ROI_mean_CS)
+fit.trlsb.pallidum <- lm(TRBTS ~ 1 + pallidum, data=tauda_ROI_mean_CS)
+fit.pgbrd.pallidum <- lm(DomMean ~ 1 + pallidum, data=tauda_ROI_mean_CS)
+fit.cvltca.lentiform <- lm(CVLtca ~ 1 + lentiform, data = tauda_ROI_mean_CS)
+fit.cvlfrs.lentiform <- lm(CVLfrs ~ 1 + lentiform, data = tauda_ROI_mean_CS)
+fit.trlsa.lentiform <- lm(TRATS ~ 1 + lentiform, data=tauda_ROI_mean_CS)
+fit.trlsb.lentiform <- lm(TRBTS ~ 1 + lentiform, data=tauda_ROI_mean_CS)
+fit.pgbrd.lentiform <- lm(DomMean ~ 1 + lentiform, data=tauda_ROI_mean_CS)
+@
+
+<<ROI_cognitive_associations_results, results = 'asis'>>=
+stargazer(fit.cvltca.putamen, fit.cvlfrs.putamen, fit.trlsa.putamen, fit.trlsb.putamen, fit.pgbrd.putamen,
+          dep.var.labels = c("CVL Immediate","CVL Delayed","Trails A","Trails B","Pegboard"), 
+          title = "Cognitive Associations with SUVR in Putamen", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))
+@
+\clearpage
+<<ROI_cognitive_associations_results1, results = 'asis'>>=
+stargazer(fit.cvltca.pallidum, fit.cvlfrs.pallidum, fit.trlsa.pallidum, fit.trlsb.pallidum, fit.pgbrd.pallidum,
+          dep.var.labels = c("CVL Immediate","CVL Delayed","Trails A","Trails B","Pegboard"), 
+          title = "Cognitive Associations with SUVR in Pallidum", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))
+@
+\clearpage
+<<ROI_cognitive_associations_results2, results = 'asis'>>=
+stargazer(fit.cvltca.lentiform, fit.cvlfrs.lentiform, fit.trlsa.lentiform, fit.trlsb.lentiform, fit.pgbrd.lentiform,
+          dep.var.labels = c("CVL Immediate","CVL Delayed","Trails A","Trails B","Pegboard"), 
+          title = "Cognitive Associations with SUVR in Lentiform Nucleus", report="vc*sp", star.cutoffs=c(0.05,0.01,0.001))
+@
+
+\end{landscape}
+
+\clearpage
+
+\newgeometry{margin=0.5in}
+
+\section{Summary of Exploratory Analysis}
+
+\subsection{Age, PiB, and Volume as Correlates of AV1451 SUVR in ROIs}
+
+This relatively comprehensive visual summary of findings from our preliminary analysis describes the relationship between AV1451 SUVR and age, PiB, and volume in areas that are relevant because of their place in Braak staging or that were identified following voxelwise analysis of tracer uptake.
+
+<<models_for_figure_2>>=
+fit.entorhinal.age <- lm(entorhinal ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.entorhinal.pib <- lm(entorhinal ~ 1 + AV1451age + PIBentorhinal*as.factor(I(1-pibgroup)), data = tauda_ROI_mean_CS)
+fit.entorhinal.vol <- lm(entorhinal ~ 1 + AV1451age + I((X116a+X117a)/1000), data = tauda_ROI_mean_CS)
+fit.fusiform.age <- lm(fusiform ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.fusiform.pib <- lm(fusiform ~ 1 + AV1451age + PIBfusiform*as.factor(I(1-pibgroup)), data = tauda_ROI_mean_CS)
+fit.fusiform.vol <- lm(fusiform ~ 1 + AV1451age + I((X122a+X123a)/1000), data = tauda_ROI_mean_CS)
+fit.inferior.temporal.age <- lm(inferior.temporal ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.inferior.temporal.pib <- lm(inferior.temporal ~ 1 + AV1451age + PIBinferior.temporal*as.factor(I(1-pibgroup)), data = tauda_ROI_mean_CS)
+fit.inferior.temporal.vol <- lm(inferior.temporal ~ 1 + AV1451age + I((X132a+X133a)/1000), data = tauda_ROI_mean_CS)
+fit.precuneus.age <- lm(precuneus ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.precuneus.pib <- lm(precuneus ~ 1 + AV1451age + PIBprecuneus*as.factor(I(1-pibgroup)), data = tauda_ROI_mean_CS)
+fit.precuneus.vol <- lm(precuneus ~ 1 + AV1451age + I((X168a+X169a)/1000), data = tauda_ROI_mean_CS)
+fit.postcentral.gyrus.age <- lm(postcentral.gyrus ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.postcentral.gyrus.pib <- lm(postcentral.gyrus ~ 1 + AV1451age + PIBpostcentral.gyrus*as.factor(I(1-pibgroup)), data = tauda_ROI_mean_CS)
+fit.postcentral.gyrus.vol <- lm(postcentral.gyrus ~ 1 + AV1451age + I((X176a+X177a)/1000), data = tauda_ROI_mean_CS)
+fit.lentiform.age <- lm(lentiform ~ 1 + AV1451age, data = tauda_ROI_mean_CS)
+fit.lentiform.pib <- lm(lentiform ~ 1 + AV1451age + PIBlentiform*as.factor(I(1-pibgroup)), data = tauda_ROI_mean_CS)
+fit.lentiform.vol <- lm(lentiform ~ 1 + AV1451age + I((X55a+X56a+X57a+X58a)/1000), data = tauda_ROI_mean_CS)
+@
+
+<<HAI_figure_2_v2, fig.cap = "Left to right: (a) regional AV1451 SUVR vs. age, (b) age-adjusted regional AV1451 SUVR vs. regional PiB DVR, and (c) age-adjusted regional AV1451 SUVR vs. regional volume (residualized to account for intracranial volume). Top to bottom: Regions of interest: Entorhinal cortex (Braak I), fusiform gyrus (Braak III), inferior temporal gyrus (Braak IV), precuneus (Braak V), postcentral gyrus (Braak VI), and lentiform nucleus. Each marker indicates an individual. Blue = PiB-, orange = PiB+, circle = CN; triangle = MCI; square = other impairment">>=
+p1 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=entorhinal)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("Entorhinal \nAV1451 SUVR") +
+      #ggtitle("Entorhinal") +
+      geom_smooth(method = 'lm') +
+      ylim(c(0.85,1.55)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p7 <- ggplot(tauda_ROI_mean_CS, aes(x=PIBentorhinal, y=entorhinal - coef(fit.entorhinal.pib)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("") +
+      #ggtitle("Entorhinal") +
+      geom_smooth(aes(group = as.factor(pibgroup), colour=as.factor(pibgroup)), method = 'lm') +
+      ylim(c(0.85,1.65)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p13 <- ggplot(tauda_ROI_mean_CS, aes(x=(X116a+X117a)/1000, y=entorhinal - coef(fit.entorhinal.vol)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("") +
+      #ggtitle("Entorhinal") +
+      geom_smooth(method = 'lm') +
+      ylim(c(0.65,1.60)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p2 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=fusiform)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab(" Fusiform \nAV1451 SUVR") +
+      #ggtitle("Fusiform") +
+      geom_smooth(method = 'lm') + 
+      ylim(c(0.85,1.55)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p8 <- ggplot(tauda_ROI_mean_CS, aes(x=PIBfusiform, y=fusiform - coef(fit.fusiform.pib)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("") +
+      #ggtitle("Fusiform") +
+      geom_smooth(aes(group = as.factor(pibgroup), colour=as.factor(pibgroup)), method = 'lm') +
+      ylim(c(0.85,1.65)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5) +
+      annotate("text", x = 1.25, y = 1.57, size = 2, label = "p-value = 0.021")
+
+p14 <- ggplot(tauda_ROI_mean_CS, aes(x=(X122a+X123a)/1000, y=fusiform - coef(fit.fusiform.vol)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("") +
+      #ggtitle("Fusiform") +
+      geom_smooth(method = 'lm') + 
+      ylim(c(0.65,1.60)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+p3 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=inferior.temporal)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("Inf Temporal \nAV1451 SUVR") +
+      #ggtitle("Inf Temporal") +
+      geom_smooth(method = 'lm') + 
+      ylim(c(0.85,1.55)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p9 <- ggplot(tauda_ROI_mean_CS, aes(x=PIBinferior.temporal, y=inferior.temporal - coef(fit.inferior.temporal.pib)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("") +
+      #ggtitle("Inf Temporal") +
+      geom_smooth(aes(group = as.factor(pibgroup), colour=as.factor(pibgroup)), method = 'lm') +
+      ylim(c(0.85,1.65)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5) +
+      annotate("text", x = 1.37, y = 1.62, size = 2, label = "p-value = 0.011")
+
+p15 <- ggplot(tauda_ROI_mean_CS, aes(x=(X132a+X133a)/1000, y=inferior.temporal - coef(fit.inferior.temporal.vol)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+      ylab("") +
+      #ggtitle("Inf Temporal") +
+      geom_smooth(method = 'lm') + 
+      ylim(c(0.65,1.60)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5) +
+      annotate("text", x = 1.25, y = 1.52, size = 2, label = "p-value = 0.032")
+
+p4 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=precuneus)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("Precuneus \nAV1451 SUVR") +
+      #ggtitle("Precuneus") +
+      geom_smooth(method = 'lm') + 
+      ylim(c(0.85,1.55)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p10 <- ggplot(tauda_ROI_mean_CS, aes(x=PIBprecuneus, y=precuneus - coef(fit.precuneus.pib)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("") +
+      #ggtitle("Precuneus") +
+      geom_smooth(aes(group = as.factor(pibgroup), colour=as.factor(pibgroup)), method = 'lm') +
+      ylim(c(0.85,1.65)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5) +
+      annotate("text", x = 1.62, y = 1.58, size = 2, label = "p-value = 0.022")
+
+p16 <- ggplot(tauda_ROI_mean_CS, aes(x=(X168a+X169a)/1000, y=precuneus - coef(fit.precuneus.vol)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+      ylab("") +
+      #ggtitle("Precuneus") +
+      geom_smooth(method = 'lm') + 
+      ylim(c(0.65,1.60)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p5 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=postcentral.gyrus)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("Postcentral \nAV1451 SUVR") +
+      #ggtitle("Postcentral") +
+      geom_smooth(method = 'lm') + 
+      ylim(c(0.85,1.55)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p11 <- ggplot(tauda_ROI_mean_CS, aes(x=PIBpostcentral.gyrus, y=postcentral.gyrus - coef(fit.postcentral.gyrus.pib)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("") +
+  	  ylab("") +
+      #ggtitle("Postcentral") +
+      geom_smooth(aes(group = as.factor(pibgroup), colour=as.factor(pibgroup)), method = 'lm') +
+      ylim(c(0.85,1.65)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5) +
+      annotate("text", x = 1.27, y = 1.63, size = 2, label = "p-value = 0.022")
+
+p17 <- ggplot(tauda_ROI_mean_CS, aes(x=(X176a+X177a)/1000, y=postcentral.gyrus - coef(fit.postcentral.gyrus.vol)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+      stat_fit_glance(method = 'lm', 
+                      method.args = list(formula = y ~ x),
+                      geom = 'text', aes(label = paste("p-value = ", signif(..p.value.., digits = 2), sep = "")),
+                      label.x.npc = "right", label.y.npc = "top", size = 2, inherit.aes = T) +
+   	  xlab("") +
+      ylab("") +
+      #ggtitle("Postcentral") +
+      geom_smooth(method = 'lm') + 
+      ylim(c(0.65,1.60)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p6 <- ggplot(tauda_ROI_mean_CS, aes(x=AV1451age, y=lentiform)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+      stat_fit_glance(method = 'lm', 
+                      method.args = list(formula = y ~ x),
+                      geom = 'text', aes(label = paste("p-value = ", signif(..p.value.., digits = 2), sep = "")),
+                      label.x.npc = "left", label.y.npc = "top", size = 2, inherit.aes = T) +
+   	  xlab("Age") +
+  	  ylab("Lentiform \nAV1451 SUVR") +
+      #ggtitle("Lentiform") +
+      ylim(c(0.75,2.25)) +
+      geom_smooth(method = 'lm') + 
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p12 <- ggplot(tauda_ROI_mean_CS, aes(x=PIBlentiform, y=lentiform - coef(fit.lentiform.pib)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab("PiB DVR") +
+  	  ylab("") +
+      #ggtitle("Lentiform") +
+      geom_smooth(aes(group = as.factor(pibgroup), colour=as.factor(pibgroup)), method = 'lm') +
+      ylim(c(0.75,2.25)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+p18 <- ggplot(tauda_ROI_mean_CS, aes(x=(X55a+X56a+X57a+X58a)/1000, y=lentiform - coef(fit.lentiform.vol)["AV1451age"]*AV1451age)) +
+      geom_point(aes(shape=as.factor(av1451currdx), colour=as.factor(pibgroup)), size = 1)+
+      scale_colour_manual(name="PiB group",
+                          values=c("#0072B2", "#D55E00"),
+                          labels=c("PiB-", "PiB+"),
+                          na.value="#999999") +
+      scale_shape_manual(name="Dx",
+                  values=c(15,16,17),
+                  labels=c("Other impair.","CN","MCI")) +
+   	  xlab(bquote('Volume (residualized, '*~cm^3*')')) +
+      ylab("") +
+      #ggtitle("Lentiform") +
+      geom_smooth(method = 'lm') + 
+      ylim(c(0.75,2.25)) +
+      theme_minimal(base_size = 8) +
+      theme(legend.position="none", aspect.ratio=0.5)
+
+multiplot(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, cols = 3)
+@
+
+\label{fig:age_pib_vol}
+
+\clearpage
+
+\newgeometry{margin=1in}
+
+\subsection{Conclusions}
+
+In all, our exploratory analysis of BLSA AV1451 PET tracer data yielded several important findings. First, AV1451 uptake was correlated with PiB status in a widespread fashion across the brain, though this relationship may have been influenced by sex. This is particularly notable given the current hypothesis that tau spread into the neocortex occurs only in the presence of amyloid~\cite{Bennett2017}. In addition, voxelwise data also suggested that AV1451 uptake was correlated with both age and PiB status in the lentiform nucleus, though regional analysis was able to confirm only the association with age. Finally, AV1451 uptake was not correlated with cognitive performance in any region of interest.
+
+These results are intriguing but concerning because of how different they are from what has been previously reported in other studies. Specifically, we are not sure to what extent we can say that AV1451 is indeed binding to neurofibrillary tangles of tau in our sample of non-demented, mostly cognitively-normal individuals as autoradiography data suggest it should~\cite{Liang2016}. Off-target binding may be occuring in the pallidum and putamen, or even on a wider scale throughout the brain. In addition, the high degree of correlation between AV1451 SUVR and PiB DVR is confusing because we do not expect these two tracers to be associated to the extent that we see in our sample. This raises the possibility that the relationships we observe can be attributed to correlated noise, or perhaps that the AV1451 tracer may in some way be binding to amyloid and not tau.
+
+In addition, we repeated these regional analyses with SUVR values that had undergone partial volume correction to see if this transformation significantly changed our results. We also ran these analyses with SUVR quartile 3 values (as opposed to mean SUVR) to see if these larger values were more meaningful for the associations we were testing. Although there were subtle differences in the strengths of the relationships between age, PiB, and regional volume, neither of these alternative analyses dramatically altered our results.
+
+\bibliographystyle{plain}
+\bibliography{K://LBN/BABS/cogstore/cog1/home/jacob/BibteX_files/LBN.bib}
+
+\end{document}
